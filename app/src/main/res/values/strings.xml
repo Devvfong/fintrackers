@@ -91,4 +91,5 @@
     <string name="start_tracking_your_expenses">Start tracking your expenses</string>
     <string name="add_your_first_transaction">Add your first transaction</string>
     <string name="december">December</string>
+    <string name="add_transaction">Add Transaction</string>
 </resources>

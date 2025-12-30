@@ -1,147 +1,101 @@
 package com.example.fintracker;
 
-import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.card.MaterialCardView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public class TransactionFragment extends Fragment {
 
     private RecyclerView rvTransactions;
-    private TransactionAdapter adapter;
-    private List<Transaction> transactionList;
-    private LinearLayout btnMonthSelector;
-    private MaterialCardView btnFinancialReport;
-    private TextView tvMonthYear;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
-    private Calendar selectedMonth;
+    private FloatingActionButton fabAddTransaction;
 
-    @SuppressLint("MissingInflatedId")
+    private TransactionAdapter adapter;
+    private final List<Transaction> list = new ArrayList<>();
+
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_transaction, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_transaction, container, false);
+    }
 
-        db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
-        selectedMonth = Calendar.getInstance();
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        // Initialize views
         rvTransactions = view.findViewById(R.id.rvTransactions);
-        btnMonthSelector = view.findViewById(R.id.btnMonthSelector);
-        btnFinancialReport = view.findViewById(R.id.btnFinancialReport);
-        tvMonthYear = view.findViewById(R.id.tvMonthYear);
+        fabAddTransaction = view.findViewById(R.id.fabAddTransaction);
 
-        // Setup RecyclerView
-        transactionList = new ArrayList<>();
-        adapter = new TransactionAdapter(getContext(), transactionList);
-        rvTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        rvTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new TransactionAdapter(requireContext(), list);
         rvTransactions.setAdapter(adapter);
 
-        setupListeners();
-        updateMonthDisplay();
-        loadTransactions();
-
-        return view;
-    }
-
-    private void setupListeners() {
-        // Month selector
-        btnMonthSelector.setOnClickListener(v -> showMonthPicker());
-
-        // Financial report
-        btnFinancialReport.setOnClickListener(v -> {
-            // TODO: Navigate to financial report
+        fabAddTransaction.setOnClickListener(v -> {
+            startActivity(new Intent(requireContext(), AddTransactionActivity.class));
         });
+
+        loadTransactions();
     }
 
-    private void showMonthPicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> {
-                    selectedMonth.set(Calendar.YEAR, year);
-                    selectedMonth.set(Calendar.MONTH, month);
-                    updateMonthDisplay();
-                    loadTransactions();
-                },
-                selectedMonth.get(Calendar.YEAR),
-                selectedMonth.get(Calendar.MONTH),
-                1
-        );
-        datePickerDialog.show();
-    }
-
-    private void updateMonthDisplay() {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM", Locale.getDefault());
-        tvMonthYear.setText(sdf.format(selectedMonth.getTime()));
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
     private void loadTransactions() {
-        if (mAuth.getCurrentUser() == null) return;
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(requireContext(), "Not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        String userId = mAuth.getCurrentUser().getUid();
+        String userId = auth.getCurrentUser().getUid();
 
-        Calendar startCal = (Calendar) selectedMonth.clone();
-        startCal.set(Calendar.DAY_OF_MONTH, 1);
-        startCal.set(Calendar.HOUR_OF_DAY, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.SECOND, 0);
-        long startTime = startCal.getTimeInMillis();
-
-        Calendar endCal = (Calendar) selectedMonth.clone();
-        endCal.set(Calendar.DAY_OF_MONTH, endCal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        endCal.set(Calendar.HOUR_OF_DAY, 23);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.SECOND, 59);
-        long endTime = endCal.getTimeInMillis();
-
+        // No orderBy here => no composite index needed
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
-                .whereGreaterThanOrEqualTo("timestamp", startTime)
-                .whereLessThanOrEqualTo("timestamp", endTime)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) return;
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    list.clear();
 
-                    transactionList.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document : value) {
-                            Transaction transaction = document.toObject(Transaction.class);
-                            transaction.setId(document.getId());
-                            transactionList.add(transaction);
-                        }
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        Transaction t = doc.toObject(Transaction.class);
+                        if (t != null) list.add(t);
                     }
 
+                    // Sort in Java by timestamp DESC (matches your saved field)
+                    Collections.sort(list, (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
+
                     adapter.notifyDataSetChanged();
-                });
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), "Load failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mAuth.getCurrentUser() != null) {
-            loadTransactions();
-        }
+        // Refresh when coming back from AddTransactionActivity
+        loadTransactions();
     }
 }

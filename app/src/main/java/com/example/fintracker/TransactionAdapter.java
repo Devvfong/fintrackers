@@ -6,9 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,19 +38,18 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         Transaction transaction = transactionList.get(position);
 
-        // Set category name
         holder.tvCategory.setText(transaction.getCategory());
 
-        // Set description
-        if (transaction.getDescription() != null && !transaction.getDescription().isEmpty()) {
-            holder.tvDescription.setText(transaction.getDescription());
+        String desc = transaction.getDescription();
+        if (desc != null && !desc.trim().isEmpty()) {
+            holder.tvDescription.setText(desc);
             holder.tvDescription.setVisibility(View.VISIBLE);
         } else {
             holder.tvDescription.setVisibility(View.GONE);
         }
 
-        // Set amount with sign
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
+
         String amountText;
         if ("Income".equals(transaction.getType())) {
             amountText = "+ " + formatter.format(transaction.getAmount());
@@ -59,12 +60,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         }
         holder.tvAmount.setText(amountText);
 
-        // Set time
         SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        String time = timeFormat.format(new Date(transaction.getTimestamp()));
-        holder.tvTime.setText(time);
+        holder.tvTime.setText(timeFormat.format(new Date(transaction.getTimestamp())));
 
-        // Set category icon and background color
         setCategoryIcon(holder, transaction.getCategory());
     }
 
@@ -86,7 +84,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 bgColor = R.color.category_food;
                 break;
             case "Transport":
-                iconRes = R.drawable.ic_shopping; // Add transport icon later
+                iconRes = R.drawable.ic_shopping; // TODO replace with transport icon
                 bgColor = R.color.category_transport;
                 break;
             case "Salary":
@@ -96,6 +94,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             default:
                 iconRes = R.drawable.ic_shopping;
                 bgColor = R.color.purple_primary;
+                break;
         }
 
         holder.ivCategoryIcon.setImageResource(iconRes);

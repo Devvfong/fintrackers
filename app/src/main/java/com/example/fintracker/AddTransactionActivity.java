@@ -79,6 +79,9 @@ public class AddTransactionActivity extends AppCompatActivity {
         actvWallet = findViewById(R.id.actvWallet);
         etDescription = findViewById(R.id.etDescription);
         btnContinue = findViewById(R.id.btnContinue);
+        btnContinue.setEnabled(true);
+        btnContinue.setText("Continue");
+
         ImageButton btnBack = findViewById(R.id.btnBack);
         LinearLayout layoutAttachment = findViewById(R.id.layoutAttachment);
         TextView tvTitle = findViewById(R.id.tvTitle);
@@ -298,12 +301,21 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void saveTransaction() {
-        String amountStr = etAmount.getText().toString().trim().replace("$", "").replace(",", "");
+
+        // If currently uploading, block saving (optional safety)
+        if ("Uploading...".contentEquals(btnContinue.getText())) {
+            Toast.makeText(this, "Please wait for upload to finish (or cancel attachment).", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String amountStr = etAmount.getText().toString().trim()
+                .replace("$", "")
+                .replace(",", "");
+
         String category = actvCategory.getText().toString().trim();
         String wallet = actvWallet.getText().toString().trim();
         String description = Objects.requireNonNull(etDescription.getText()).toString().trim();
 
-        // Validation
         if (TextUtils.isEmpty(amountStr) || amountStr.equals("0")) {
             Toast.makeText(this, "⚠️ Please enter amount", Toast.LENGTH_SHORT).show();
             etAmount.requestFocus();
@@ -330,11 +342,14 @@ public class AddTransactionActivity extends AppCompatActivity {
             return;
         }
 
-        assert mAuth.getCurrentUser() != null;
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String userId = mAuth.getCurrentUser().getUid();
         String type = category.equals("Salary") ? "Income" : "Expense";
 
-        // Create transaction map
         Map<String, Object> transaction = new HashMap<>();
         transaction.put("userId", userId);
         transaction.put("amount", amount);
@@ -345,12 +360,11 @@ public class AddTransactionActivity extends AppCompatActivity {
         transaction.put("timestamp", System.currentTimeMillis());
         transaction.put("isRepeated", switchRepeat.isChecked());
 
-        // Add attachment URL if exists
-        if (attachmentUrl != null) {
+        // Attachment is OPTIONAL
+        if (attachmentUrl != null && !attachmentUrl.trim().isEmpty()) {
             transaction.put("attachmentUrl", attachmentUrl);
         }
 
-        // Save to Firestore
         btnContinue.setEnabled(false);
         btnContinue.setText("Saving...");
 
@@ -366,5 +380,6 @@ public class AddTransactionActivity extends AppCompatActivity {
                     btnContinue.setText("Continue");
                 });
     }
+
 
 }
