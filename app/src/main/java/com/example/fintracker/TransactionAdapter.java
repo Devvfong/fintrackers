@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.NumberFormat;
@@ -25,6 +26,20 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public TransactionAdapter(Context context, List<Transaction> transactionList) {
         this.context = context;
         this.transactionList = transactionList;
+    }
+
+    // Add this method to your existing TransactionAdapter
+    public void removeItem(int position) {
+        transactionList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+
+    // 🔥 ADD THIS METHOD - FIXES 1-ITEM PROBLEM
+    public void updateTransactions(List<Transaction> newTransactions) {
+        this.transactionList.clear();
+        this.transactionList.addAll(newTransactions);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -49,14 +64,13 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
-
         String amountText;
         if ("Income".equals(transaction.getType())) {
             amountText = "+ " + formatter.format(transaction.getAmount());
-            holder.tvAmount.setTextColor(context.getResources().getColor(R.color.green_income));
+            holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.green_income));
         } else {
             amountText = "- " + formatter.format(transaction.getAmount());
-            holder.tvAmount.setTextColor(context.getResources().getColor(R.color.red_expense));
+            holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.red_expense));
         }
         holder.tvAmount.setText(amountText);
 
@@ -68,37 +82,38 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     private void setCategoryIcon(TransactionViewHolder holder, String category) {
         int iconRes;
-        int bgColor;
+        if ("Shopping".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_gallery;
+        } else if ("Subscription".equals(category)) {
+            iconRes = android.R.drawable.ic_dialog_info;
+        } else if ("Food".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_info_details;
+        } else if ("Salary".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_agenda;
+        } else if ("Transport".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_directions;
+        } else {
+            iconRes = android.R.drawable.ic_menu_more;
+        }
 
-        switch (category) {
-            case "Shopping":
-                iconRes = R.drawable.ic_shopping;
-                bgColor = R.color.category_shopping;
-                break;
-            case "Subscription":
-                iconRes = R.drawable.ic_subscription;
-                bgColor = R.color.category_subscription;
-                break;
-            case "Food":
-                iconRes = R.drawable.ic_food;
-                bgColor = R.color.category_food;
-                break;
-            case "Transport":
-                iconRes = R.drawable.ic_shopping; // TODO replace with transport icon
-                bgColor = R.color.category_transport;
-                break;
-            case "Salary":
-                iconRes = R.drawable.ic_income;
-                bgColor = R.color.green_income;
-                break;
-            default:
-                iconRes = R.drawable.ic_shopping;
-                bgColor = R.color.purple_primary;
-                break;
+        int bgColorRes;
+        if ("Shopping".equals(category)) {
+            bgColorRes = R.color.category_shopping;
+        } else if ("Subscription".equals(category)) {
+            bgColorRes = R.color.category_subscription;
+        } else if ("Food".equals(category)) {
+            bgColorRes = R.color.category_food;
+        } else if ("Salary".equals(category)) {
+            bgColorRes = R.color.category_salary;
+        } else if ("Transport".equals(category)) {
+            bgColorRes = R.color.category_transport;
+        } else {
+            bgColorRes = R.color.border_light;
         }
 
         holder.ivCategoryIcon.setImageResource(iconRes);
-        holder.cvCategoryIcon.setCardBackgroundColor(context.getResources().getColor(bgColor));
+        holder.ivCategoryIcon.setColorFilter(ContextCompat.getColor(context, android.R.color.white));
+        holder.cvCategoryIcon.setCardBackgroundColor(ContextCompat.getColor(context, bgColorRes));
     }
 
     @Override

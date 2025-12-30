@@ -4,17 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp"
+    android:paddingStart="20dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="16dp"
     android:gravity="center_vertical"
     android:background="?attr/selectableItemBackground">
 
     <!-- Category Icon -->
     <androidx.cardview.widget.CardView
+        android:id="@+id/cvCategoryIcon"
         android:layout_width="60dp"
         android:layout_height="60dp"
         app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        android:id="@+id/cvCategoryIcon">
+        app:cardElevation="0dp">
 
         <ImageView
             android:id="@+id/ivCategoryIcon"
@@ -22,7 +25,8 @@
             android:layout_height="32dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_shopping"
-            android:tint="@color/purple_primary" />
+            app:tint="@android:color/white" />
+
     </androidx.cardview.widget.CardView>
 
     <!-- Transaction Details -->
@@ -31,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="12dp">
+        android:layout_marginStart="16dp">
 
         <TextView
             android:id="@+id/tvCategory"
@@ -40,7 +44,7 @@
             android:text="Shopping"
             android:textSize="16sp"
             android:textColor="@color/text_primary"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDescription"
@@ -49,7 +53,8 @@
             android:text="Buy some grocery"
             android:textSize="13sp"
             android:textColor="@color/text_secondary"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
+
     </LinearLayout>
 
     <!-- Amount and Time -->
@@ -63,10 +68,10 @@
             android:id="@+id/tvAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="- $120"
+            android:text="$120"
             android:textSize="16sp"
-            android:textColor="#FD3C4A"
-            android:textStyle="bold"/>
+            android:textColor="@color/red_expense"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvTime"
@@ -75,7 +80,8 @@
             android:text="10:00 AM"
             android:textSize="13sp"
             android:textColor="@color/text_secondary"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
+
     </LinearLayout>
 
 </LinearLayout>

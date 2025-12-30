@@ -7,7 +7,6 @@
     <string name="see_financial_report">See your financial report</string>
     <string name="today">Today</string>
     <string name="no_transactions_yet">No transactions yet</string>
-    <string name="start_tracking_your_expenses">Start tracking your expenses</string>
     <string name="add_first_transaction">Tap + to add your first transaction</string>
     <string name="add_transaction">Add Transaction</string>
 
@@ -28,7 +27,7 @@
     <string name="budget">Budget</string>
     <string name="profile">Profile</string>
 
-    <!-- Navigation Menu -->
+    <!-- Navigation Menu (for bottom_navigation_menu.xml) -->
     <string name="nav_home">Home</string>
     <string name="nav_transaction">Transaction</string>
     <string name="nav_budget">Budget</string>
@@ -49,8 +48,11 @@
     <string name="filter_income">Income</string>
     <string name="filter_expense">Expense</string>
     <string name="all_categories">All Categories</string>
+    <string name="no_transactions_yet">No transactions yet</string>
+    <string name="start_tracking">Start tracking your expenses</string>
 
     <!-- Time Filters -->
+    <string name="today">Today</string>
     <string name="month">Month</string>
     <string name="year">Year</string>
 
@@ -92,6 +94,10 @@
     <string name="category_salary">Salary</string>
     <string name="category_other">Other</string>
     <string name="todo">TODO</string>
+    <string name="see_your_financial_report">See your financial report</string>
+    <string name="start_tracking_your_expenses">Start tracking your expenses</string>
+    <string name="add_your_first_transaction">Add your first transaction</string>
     <string name="december">December</string>
-    <string name="back"></string>
+    <string name="add_transaction">Add Transaction</string>
+    <string name="back" />
 </resources>

@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.cardview)
     implementation(libs.recyclerview)
 
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
+
     // Firebase BOM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)

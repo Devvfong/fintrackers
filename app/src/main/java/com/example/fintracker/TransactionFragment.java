@@ -1,43 +1,34 @@
 package com.example.fintracker;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TransactionFragment extends Fragment {
 
-    private RecyclerView rvTransactions;
-    private FloatingActionButton fabAddTransaction;
-
+    private RecyclerView recyclerView;
     private TransactionAdapter adapter;
-    private final List<Transaction> list = new ArrayList<>();
-
-    private FirebaseAuth auth;
+    private List<Transaction> transactionList = new ArrayList<>();
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_transaction, container, false);
     }
 
@@ -45,57 +36,79 @@ public class TransactionFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        rvTransactions = view.findViewById(R.id.rvTransactions);
-        fabAddTransaction = view.findViewById(R.id.fabAddTransaction);
-
-        auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
-        rvTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new TransactionAdapter(requireContext(), list);
-        rvTransactions.setAdapter(adapter);
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setNestedScrollingEnabled(false);
 
-        fabAddTransaction.setOnClickListener(v -> {
-            startActivity(new Intent(requireContext(), AddTransactionActivity.class));
-        });
+        adapter = new TransactionAdapter(getContext(), transactionList);
+        recyclerView.setAdapter(adapter);
 
         loadTransactions();
+
+        // SWIPE TO DELETE
+        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(
+                0, ItemTouchHelper.LEFT
+        ) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                showDeleteConfirmation(position);
+            }
+        };
+
+        new ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView);
+    }
+
+    private void showDeleteConfirmation(int position) {
+        Transaction transaction = transactionList.get(position);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Delete Transaction")
+                .setMessage("Are you sure you want to delete \"" + transaction.getCategory() + "\"?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteTransaction(transaction, position))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteTransaction(Transaction transaction, int position) {
+        db.collection("transactions")
+                .document(transaction.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    transactionList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    Toast.makeText(getContext(), "Deleted", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void loadTransactions() {
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(requireContext(), "Not logged in", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (mAuth.getCurrentUser() == null) return;
 
-        String userId = auth.getCurrentUser().getUid();
-
-        // No orderBy here => no composite index needed
         db.collection("transactions")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    list.clear();
-
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        Transaction t = doc.toObject(Transaction.class);
-                        if (t != null) list.add(t);
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) return;
+                    transactionList.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            Transaction t = document.toObject(Transaction.class);
+                            t.setId(document.getId());
+                            transactionList.add(t);
+                        }
                     }
-
-                    // Sort in Java by timestamp DESC (matches your saved field)
-                    Collections.sort(list, (a, b) -> Long.compare(b.getTimestamp(), a.getTimestamp()));
-
                     adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(requireContext(), "Load failed: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                );
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Refresh when coming back from AddTransactionActivity
-        loadTransactions();
+                });
     }
 }
