@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary Colors -->
+    <color name="purple_primary">#7F3DFF</color>
+    <color name="purple_light">#EEE5FF</color>
+    <color name="purple_dark">#5F2FB8</color>
+
+    <!-- Transaction Colors -->
+    <color name="green_income">#00A86B</color>
+    <color name="red_expense">#FD3C4A</color>
+    <color name="blue_transfer">#0077FF</color>
+    <color name="yellow_warning">#FCAC12</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#F6F6F6</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="background_dark">#0D0E0F</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#212325</color>
+    <color name="text_secondary">#91919F</color>
+    <color name="text_light">#FCFCFC</color>
+    <color name="text_dark">#292B2D</color>
+
+    <!-- Border & Divider -->
+    <color name="border_light">#F1F1FA</color>
+    <color name="divider">#E3E5E5</color>
+
+    <!-- Category Colors -->
+    <color name="category_shopping">#FCAC12</color>
+    <color name="category_subscription">#7F3DFF</color>
+    <color name="category_food">#FD3C4A</color>
+    <color name="category_transport">#0077FF</color>
 </resources>

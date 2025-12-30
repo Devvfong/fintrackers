@@ -1,3 +1,49 @@
 <resources>
-    <string name="app_name">Fintrackers</string>
+    <string name="app_name">FinTrack</string>
+
+    <!-- Login Screen -->
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="dont_have_account">Don\'t have an account yet? Sign Up</string>
+
+    <!-- Sign Up Screen -->
+    <string name="sign_up">Sign Up</string>
+    <string name="name">Name</string>
+    <string name="already_have_account">Already have an account? Login</string>
+    <string name="terms_agreement">By signing up, you agree to the Terms of Service and Privacy Policy</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_transaction">Transaction</string>
+    <string name="nav_budget">Budget</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Home Screen -->
+    <string name="account_balance">Account Balance</string>
+    <string name="income">Income</string>
+    <string name="expenses">Expenses</string>
+    <string name="spend_frequency">Spend Frequency</string>
+    <string name="recent_transaction">Recent Transaction</string>
+    <string name="see_all">See All</string>
+
+    <!-- Transaction Screen -->
+    <string name="financial_report">See your financial report</string>
+    <string name="filter_transaction">Filter Transaction</string>
+    <string name="today">Today</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+
+    <!-- Budget Screen -->
+    <string name="create_budget">Create a budget</string>
+    <string name="remaining">Remaining</string>
+    <string name="exceed_limit">You\'ve exceed the limit!</string>
+
+    <!-- Common -->
+    <string name="continue_text">Continue</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
 </resources>
