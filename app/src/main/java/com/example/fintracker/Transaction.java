@@ -1,8 +1,6 @@
 package com.example.fintracker;
 
 
-import java.util.Date;
-
 public class Transaction {
     private String id;
     private String userId;

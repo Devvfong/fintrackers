@@ -2,7 +2,7 @@ package com.example.fintracker;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -11,15 +11,12 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
-    private BottomNavigationView bottomNav;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
         // Check if user is signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -35,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Initialize bottom navigation
-        bottomNav = findViewById(R.id.bottomNavigation);
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 
         // Load default fragment
         if (savedInstanceState == null) {

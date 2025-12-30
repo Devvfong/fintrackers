@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,17 +27,14 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class HomeFragment extends Fragment {
 
     private TextView tvAccountBalance, tvIncome, tvExpense;
-    private RecyclerView rvRecentTransactions;
     private LineChart spendFrequencyChart;
     private TransactionAdapter adapter;
     private List<Transaction> transactionList;
@@ -59,7 +57,7 @@ public class HomeFragment extends Fragment {
         tvAccountBalance = view.findViewById(R.id.tvAccountBalance);
         tvIncome = view.findViewById(R.id.tvIncome);
         tvExpense = view.findViewById(R.id.tvExpense);
-        rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
+        RecyclerView rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
         spendFrequencyChart = view.findViewById(R.id.spendFrequencyChart);
 
         transactionList = new ArrayList<>();
@@ -100,7 +98,9 @@ public class HomeFragment extends Fragment {
         spendFrequencyChart.setExtraOffsets(10, 10, 10, 10);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void loadTransactions() {
+        assert mAuth.getCurrentUser() != null;
         String userId = mAuth.getCurrentUser().getUid();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -30);
@@ -174,9 +174,7 @@ public class HomeFragment extends Fragment {
         }
 
         // Sort by timestamp (oldest to newest)
-        Collections.sort(expenseTransactions, (t1, t2) ->
-                Long.compare(t1.getTimestamp(), t2.getTimestamp())
-        );
+        expenseTransactions.sort(Comparator.comparingLong(Transaction::getTimestamp));
 
         // Get last 5 transactions
         int startIndex = Math.max(0, expenseTransactions.size() - 5);
@@ -186,13 +184,12 @@ public class HomeFragment extends Fragment {
         List<Entry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM", Locale.getDefault());
 
         for (int i = 0; i < lastFive.size(); i++) {
             Transaction t = lastFive.get(i);
             entries.add(new Entry(i, (float) t.getAmount()));
 
-            // Label shows time or date
+            // Label shows time
             String label = timeFormat.format(new Date(t.getTimestamp()));
             labels.add(label);
         }
@@ -230,7 +227,6 @@ public class HomeFragment extends Fragment {
         spendFrequencyChart.animateX(1200);
         spendFrequencyChart.invalidate();
     }
-
 
     private void updateBalanceUI() {
         double balance = totalIncome - totalExpense;

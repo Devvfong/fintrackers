@@ -17,8 +17,8 @@ import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
-    private Context context;
-    private List<Transaction> transactionList;
+    private final Context context;
+    private final List<Transaction> transactionList;
 
     public TransactionAdapter(Context context, List<Transaction> transactionList) {
         this.context = context;

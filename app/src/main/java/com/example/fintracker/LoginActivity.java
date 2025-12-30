@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,6 +12,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -35,14 +38,10 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> loginUser());
 
         // Sign up link click
-        findViewById(R.id.tvSignUpLink).setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-        });
+        findViewById(R.id.tvSignUpLink).setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, SignUpActivity.class)));
 
         // Forgot password click
-        findViewById(R.id.tvForgotPassword).setOnClickListener(v -> {
-            Toast.makeText(this, "Forgot password feature coming soon", Toast.LENGTH_SHORT).show();
-        });
+        findViewById(R.id.tvForgotPassword).setOnClickListener(v -> Toast.makeText(this, "Forgot password feature coming soon", Toast.LENGTH_SHORT).show());
     }
 
     @Override
@@ -55,9 +54,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void loginUser() {
-        String email = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String email = Objects.requireNonNull(etEmail.getText()).toString().trim();
+        String password = Objects.requireNonNull(etPassword.getText()).toString().trim();
 
         // Validation
         if (TextUtils.isEmpty(email)) {
@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                         navigateToMain();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "Login failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
                         btnLogin.setEnabled(true);
                         btnLogin.setText("Login");
                     }

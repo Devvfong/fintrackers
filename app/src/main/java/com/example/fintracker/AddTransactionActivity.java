@@ -1,6 +1,7 @@
 package com.example.fintracker;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -37,6 +39,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class AddTransactionActivity extends AppCompatActivity {
 
@@ -44,19 +47,14 @@ public class AddTransactionActivity extends AppCompatActivity {
     private AutoCompleteTextView actvCategory, actvWallet;
     private TextInputEditText etDescription;
     private MaterialButton btnContinue;
-    private ImageButton btnBack;
-    private LinearLayout layoutAttachment, rootLayout;
-    private TextView tvTitle;
     private SwitchMaterial switchRepeat;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private FirebaseStorage storage;
     private StorageReference storageRef;
 
     private Uri imageUri;
     private String attachmentUrl = null;
-    private boolean isExpense = true;
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int STORAGE_PERMISSION_CODE = 101;
@@ -72,7 +70,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        storage = FirebaseStorage.getInstance();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
 
         // Initialize views
@@ -81,10 +79,10 @@ public class AddTransactionActivity extends AppCompatActivity {
         actvWallet = findViewById(R.id.actvWallet);
         etDescription = findViewById(R.id.etDescription);
         btnContinue = findViewById(R.id.btnContinue);
-        btnBack = findViewById(R.id.btnBack);
-        layoutAttachment = findViewById(R.id.layoutAttachment);
-        tvTitle = findViewById(R.id.tvTitle);
-        rootLayout = findViewById(R.id.rootLayout);
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        LinearLayout layoutAttachment = findViewById(R.id.layoutAttachment);
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        LinearLayout rootLayout = findViewById(R.id.rootLayout);
         switchRepeat = findViewById(R.id.switchRepeat);
 
         // Setup activity result launchers
@@ -125,6 +123,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() > 0 && !s.toString().startsWith("$")) {
@@ -142,6 +141,7 @@ public class AddTransactionActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Bundle extras = result.getData().getExtras();
+                        assert extras != null;
                         Bitmap imageBitmap = (Bitmap) extras.get("data");
                         if (imageBitmap != null) {
                             uploadImageToFirebase(imageBitmap);
@@ -209,6 +209,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("QueryPermissionsNeeded")
     private void openCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (cameraIntent.resolveActivity(getPackageManager()) != null) {
@@ -224,6 +225,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         galleryLauncher.launch(galleryIntent);
     }
 
+    @SuppressLint("SetTextI18n")
     private void uploadImageToFirebase(Bitmap bitmap) {
         btnContinue.setEnabled(false);
         btnContinue.setText("Uploading...");
@@ -232,6 +234,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
         byte[] data = baos.toByteArray();
 
+        assert mAuth.getCurrentUser() != null;
         String userId = mAuth.getCurrentUser().getUid();
         String fileName = "receipts/" + userId + "/" + System.currentTimeMillis() + ".jpg";
         StorageReference fileRef = storageRef.child(fileName);
@@ -250,10 +253,12 @@ public class AddTransactionActivity extends AppCompatActivity {
                 });
     }
 
+    @SuppressLint("SetTextI18n")
     private void uploadImageUriToFirebase(Uri uri) {
         btnContinue.setEnabled(false);
         btnContinue.setText("Uploading...");
 
+        assert mAuth.getCurrentUser() != null;
         String userId = mAuth.getCurrentUser().getUid();
         String fileName = "receipts/" + userId + "/" + System.currentTimeMillis() + ".jpg";
         StorageReference fileRef = storageRef.child(fileName);
@@ -273,7 +278,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == CAMERA_PERMISSION_CODE) {
@@ -291,11 +296,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void saveTransaction() {
         String amountStr = etAmount.getText().toString().trim().replace("$", "").replace(",", "");
         String category = actvCategory.getText().toString().trim();
         String wallet = actvWallet.getText().toString().trim();
-        String description = etDescription.getText().toString().trim();
+        String description = Objects.requireNonNull(etDescription.getText()).toString().trim();
 
         // Validation
         if (TextUtils.isEmpty(amountStr) || amountStr.equals("0")) {
@@ -324,6 +330,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             return;
         }
 
+        assert mAuth.getCurrentUser() != null;
         String userId = mAuth.getCurrentUser().getUid();
         String type = category.equals("Salary") ? "Income" : "Expense";
 
@@ -359,4 +366,5 @@ public class AddTransactionActivity extends AppCompatActivity {
                     btnContinue.setText("Continue");
                 });
     }
+
 }

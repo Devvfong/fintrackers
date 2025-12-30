@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,6 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -42,15 +44,14 @@ public class SignUpActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(v -> signUpUser());
 
         // Login link click
-        findViewById(R.id.tvLoginLink).setOnClickListener(v -> {
-            finish();
-        });
+        findViewById(R.id.tvLoginLink).setOnClickListener(v -> finish());
     }
 
+    @SuppressLint("SetTextI18n")
     private void signUpUser() {
-        String name = etName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String name = Objects.requireNonNull(etName.getText()).toString().trim();
+        String email = Objects.requireNonNull(etEmail.getText()).toString().trim();
+        String password = Objects.requireNonNull(etPassword.getText()).toString().trim();
 
         // Validation
         if (TextUtils.isEmpty(name)) {
@@ -87,13 +88,14 @@ public class SignUpActivity extends AppCompatActivity {
                             saveUserToFirestore(user.getUid(), name, email);
                         }
                     } else {
-                        Toast.makeText(SignUpActivity.this, "Sign up failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(SignUpActivity.this, "Sign up failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
                         btnSignUp.setEnabled(true);
                         btnSignUp.setText("Sign Up");
                     }
                 });
     }
 
+    @SuppressLint("SetTextI18n")
     private void saveUserToFirestore(String userId, String name, String email) {
         Map<String, Object> user = new HashMap<>();
         user.put("name", name);

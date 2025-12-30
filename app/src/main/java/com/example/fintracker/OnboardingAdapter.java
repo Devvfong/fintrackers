@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.OnboardingViewHolder> {
 
-    private Context context;
-    private int[] layouts;
+    private final Context context;
+    private final int[] layouts;
 
     public OnboardingAdapter(Context context, int[] layouts) {
         this.context = context;

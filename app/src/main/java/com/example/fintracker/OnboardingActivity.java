@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,7 +17,7 @@ public class OnboardingActivity extends AppCompatActivity {
     private Button btnNext;
     private Button btnSkip;
 
-    private int[] layouts = {
+    private final int[] layouts = {
             R.layout.onboarding_slide1,
             R.layout.onboarding_slide2,
             R.layout.onboarding_slide3
@@ -42,6 +43,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
         // ViewPager change listener
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);

@@ -1,4 +1,4 @@
-package com.example.fintrack.models;
+package com.example.fintracker;
 
 public class Category {
     private String name;

@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +17,8 @@ import java.util.Locale;
 
 public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder> {
 
-    private Context context;
-    private List<Budget> budgetList;
+    private final Context context;
+    private final List<Budget> budgetList;
 
     public BudgetAdapter(Context context, List<Budget> budgetList) {
         this.context = context;
@@ -31,6 +32,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
         return new BudgetViewHolder(view);
     }
 
+    @SuppressLint("UseCompatLoadingForColorStateLists")
     @Override
     public void onBindViewHolder(@NonNull BudgetViewHolder holder, int position) {
         Budget budget = budgetList.get(position);

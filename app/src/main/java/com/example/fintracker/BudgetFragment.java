@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,8 +22,6 @@ import java.util.List;
 
 public class BudgetFragment extends Fragment {
 
-    private RecyclerView rvBudgets;
-    private FloatingActionButton fabCreateBudget;
     private BudgetAdapter adapter;
     private List<Budget> budgetList;
     private FirebaseFirestore db;
@@ -38,8 +37,8 @@ public class BudgetFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
 
         // Initialize views
-        rvBudgets = view.findViewById(R.id.rvBudgets);
-        fabCreateBudget = view.findViewById(R.id.fabCreateBudget);
+        RecyclerView rvBudgets = view.findViewById(R.id.rvBudgets);
+        FloatingActionButton fabCreateBudget = view.findViewById(R.id.fabCreateBudget);
 
         // Setup RecyclerView
         budgetList = new ArrayList<>();
@@ -58,6 +57,7 @@ public class BudgetFragment extends Fragment {
         return view;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void loadBudgets() {
         String userId = mAuth.getCurrentUser().getUid();
 

@@ -16,13 +16,11 @@ import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileFragment extends Fragment {
 
     private TextView tvUsername, tvInitials;
-    private LinearLayout menuAccount, menuSettings, menuExportData, menuLogout;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -38,30 +36,22 @@ public class ProfileFragment extends Fragment {
         // Initialize views
         tvUsername = view.findViewById(R.id.tvUsername);
         tvInitials = view.findViewById(R.id.tvInitials);
-        menuAccount = view.findViewById(R.id.menuAccount);
-        menuSettings = view.findViewById(R.id.menuSettings);
-        menuExportData = view.findViewById(R.id.menuExportData);
-        menuLogout = view.findViewById(R.id.menuLogout);
+        LinearLayout menuAccount = view.findViewById(R.id.menuAccount);
+        LinearLayout menuSettings = view.findViewById(R.id.menuSettings);
+        LinearLayout menuExportData = view.findViewById(R.id.menuExportData);
+        LinearLayout menuLogout = view.findViewById(R.id.menuLogout);
 
         // Load user data
         loadUserData();
 
         // Menu clicks
-        menuAccount.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Account settings coming soon", Toast.LENGTH_SHORT).show();
-        });
+        menuAccount.setOnClickListener(v -> Toast.makeText(getContext(), "Account settings coming soon", Toast.LENGTH_SHORT).show());
 
-        menuSettings.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Settings coming soon", Toast.LENGTH_SHORT).show();
-        });
+        menuSettings.setOnClickListener(v -> Toast.makeText(getContext(), "Settings coming soon", Toast.LENGTH_SHORT).show());
 
-        menuExportData.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Export data coming soon", Toast.LENGTH_SHORT).show();
-        });
+        menuExportData.setOnClickListener(v -> Toast.makeText(getContext(), "Export data coming soon", Toast.LENGTH_SHORT).show());
 
-        menuLogout.setOnClickListener(v -> {
-            showLogoutDialog();
-        });
+        menuLogout.setOnClickListener(v -> showLogoutDialog());
 
         return view;
     }
@@ -89,7 +79,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void showLogoutDialog() {
-        new AlertDialog.Builder(getContext())
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Logout?")
                 .setMessage("Are you sure you want to logout?")
                 .setPositiveButton("Yes", (dialog, which) -> {
@@ -97,7 +87,7 @@ public class ProfileFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
-                    getActivity().finish();
+                    requireActivity().finish();
                 })
                 .setNegativeButton("No", null)
                 .show();
