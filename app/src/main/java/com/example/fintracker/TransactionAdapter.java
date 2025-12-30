@@ -6,10 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -36,27 +36,70 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         Transaction transaction = transactionList.get(position);
 
+        // Set category name
         holder.tvCategory.setText(transaction.getCategory());
-        holder.tvDescription.setText(transaction.getDescription());
 
-        // Format amount
+        // Set description
+        if (transaction.getDescription() != null && !transaction.getDescription().isEmpty()) {
+            holder.tvDescription.setText(transaction.getDescription());
+            holder.tvDescription.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvDescription.setVisibility(View.GONE);
+        }
+
+        // Set amount with sign
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
         String amountText;
         if ("Income".equals(transaction.getType())) {
-            amountText = "+ $" + String.format(Locale.US, "%.2f", transaction.getAmount());
+            amountText = "+ " + formatter.format(transaction.getAmount());
             holder.tvAmount.setTextColor(context.getResources().getColor(R.color.green_income));
         } else {
-            amountText = "- $" + String.format(Locale.US, "%.2f", transaction.getAmount());
+            amountText = "- " + formatter.format(transaction.getAmount());
             holder.tvAmount.setTextColor(context.getResources().getColor(R.color.red_expense));
         }
         holder.tvAmount.setText(amountText);
 
-        // Format time
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.US);
-        String time = sdf.format(new Date(transaction.getTimestamp()));
+        // Set time
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        String time = timeFormat.format(new Date(transaction.getTimestamp()));
         holder.tvTime.setText(time);
 
-        // Set category icon (you can customize this based on category)
-        holder.ivCategoryIcon.setImageResource(R.drawable.ic_home);
+        // Set category icon and background color
+        setCategoryIcon(holder, transaction.getCategory());
+    }
+
+    private void setCategoryIcon(TransactionViewHolder holder, String category) {
+        int iconRes;
+        int bgColor;
+
+        switch (category) {
+            case "Shopping":
+                iconRes = R.drawable.ic_shopping;
+                bgColor = R.color.category_shopping;
+                break;
+            case "Subscription":
+                iconRes = R.drawable.ic_subscription;
+                bgColor = R.color.category_subscription;
+                break;
+            case "Food":
+                iconRes = R.drawable.ic_food;
+                bgColor = R.color.category_food;
+                break;
+            case "Transport":
+                iconRes = R.drawable.ic_shopping; // Add transport icon later
+                bgColor = R.color.category_transport;
+                break;
+            case "Salary":
+                iconRes = R.drawable.ic_income;
+                bgColor = R.color.green_income;
+                break;
+            default:
+                iconRes = R.drawable.ic_shopping;
+                bgColor = R.color.purple_primary;
+        }
+
+        holder.ivCategoryIcon.setImageResource(iconRes);
+        holder.cvCategoryIcon.setCardBackgroundColor(context.getResources().getColor(bgColor));
     }
 
     @Override
@@ -64,12 +107,14 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         return transactionList.size();
     }
 
-    public static class TransactionViewHolder extends RecyclerView.ViewHolder {
+    static class TransactionViewHolder extends RecyclerView.ViewHolder {
+        CardView cvCategoryIcon;
         ImageView ivCategoryIcon;
         TextView tvCategory, tvDescription, tvAmount, tvTime;
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
+            cvCategoryIcon = itemView.findViewById(R.id.cvCategoryIcon);
             ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvDescription = itemView.findViewById(R.id.tvDescription);
