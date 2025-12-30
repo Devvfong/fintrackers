@@ -29,8 +29,8 @@
             android:layout_height="32dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@android:color/white"
-            android:scaleType="centerInside"/>
+            android:scaleType="centerInside"
+            app:tint="@android:color/white" />
 
         <TextView
             android:id="@+id/tvTitle"
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:autofillHints=""
             android:hint="@string/_0"
-            android:text="$0"
+            android:text="@string/_0"
             android:textSize="64sp"
             android:textColor="@android:color/white"
             android:textColorHint="#FCFCFC"
@@ -172,7 +172,9 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Attachment -->
+                <!-- Attachment -->
                 <LinearLayout
+                    android:id="@+id/layoutAttachment"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:orientation="horizontal"
@@ -181,7 +183,8 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/border_rounded_light">
 
-                    <ImageView
+
+                <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_attachment"
