@@ -4,18 +4,18 @@ public class Budget {
     private String id;
     private String userId;
     private String category;
-    private double limit;
+    private double amount;
     private double spent;
     private long timestamp;
 
+    // Empty constructor for Firebase
     public Budget() {
-        // Required empty constructor for Firestore
     }
 
-    public Budget(String userId, String category, double limit, double spent, long timestamp) {
+    public Budget(String userId, String category, double amount, double spent, long timestamp) {
         this.userId = userId;
         this.category = category;
-        this.limit = limit;
+        this.amount = amount;
         this.spent = spent;
         this.timestamp = timestamp;
     }
@@ -45,12 +45,12 @@ public class Budget {
         this.category = category;
     }
 
-    public double getLimit() {
-        return limit;
+    public double getAmount() {
+        return amount;
     }
 
-    public void setLimit(double limit) {
-        this.limit = limit;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public double getSpent() {
@@ -69,11 +69,21 @@ public class Budget {
         this.timestamp = timestamp;
     }
 
+    // Helper methods
+    public double getLimit() {
+        return amount;
+    }
+
     public double getRemaining() {
-        return limit - spent;
+        return amount - spent;
+    }
+
+    public int getPercentageSpent() {
+        if (amount == 0) return 0;
+        return (int) ((spent / amount) * 100);
     }
 
     public boolean isExceeded() {
-        return spent > limit;
+        return spent > amount;
     }
 }

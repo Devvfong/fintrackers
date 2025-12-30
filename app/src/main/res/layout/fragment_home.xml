@@ -191,12 +191,21 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Chart will be added in next phase -->
-        <View
+        <!-- ✅ CHART ADDED HERE - REPLACE THE OLD PLACEHOLDER VIEW! -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="#F0F0F0"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/spendFrequencyChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"/>
+
+        </androidx.cardview.widget.CardView>
 
         <!-- Recent Transaction Header -->
         <LinearLayout

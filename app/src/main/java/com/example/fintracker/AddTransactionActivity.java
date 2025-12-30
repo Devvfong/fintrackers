@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +23,6 @@ public class AddTransactionActivity extends AppCompatActivity {
     private AutoCompleteTextView actvCategory, actvWallet;
     private TextInputEditText etDescription;
     private MaterialButton btnContinue;
-    private ImageButton btnClose;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -43,7 +41,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         actvWallet = findViewById(R.id.actvWallet);
         etDescription = findViewById(R.id.etDescription);
         btnContinue = findViewById(R.id.btnContinue);
-        btnClose = findViewById(R.id.btnClose);
 
         // Setup category dropdown
         String[] categories = {"Shopping", "Subscription", "Food", "Transport", "Salary"};
@@ -54,9 +51,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         String[] wallets = {"Cash", "Bank", "Card"};
         ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, wallets);
         actvWallet.setAdapter(walletAdapter);
-
-        // Close button
-        btnClose.setOnClickListener(v -> finish());
 
         // Continue button
         btnContinue.setOnClickListener(v -> saveTransaction());

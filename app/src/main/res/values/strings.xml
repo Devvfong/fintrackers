@@ -46,4 +46,15 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
+    <string name="repeat">Repeat</string>
+    <!-- REMOVED: <string name="continue">Continue</string> - RESERVED KEYWORD! -->
+    <string name="repeat_transaction">Repeat transaction</string>
+    <string name="add_attachment">Add attachment</string>
+    <string name="description">Description</string>
+    <string name="wallet">Wallet</string>
+    <string name="category">Category</string>
+    <string name="_0">$0</string>
+    <string name="expense">Expense</string>
+    <string name="how_much">How much?</string>
+    <string name="track_your_income">Track Your Income</string>
 </resources>
