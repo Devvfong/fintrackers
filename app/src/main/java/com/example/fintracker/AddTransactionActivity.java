@@ -1,13 +1,16 @@
 package com.example.fintracker;
-
+import android.view.View;
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -17,16 +20,16 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -36,16 +39,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 public class AddTransactionActivity extends AppCompatActivity {
+    private ImageView imgAttachmentPreview;
+    private View attachmentPreviewContainer;
+    private ImageButton btnRemoveAttachment;
 
     private EditText etAmount;
     private AutoCompleteTextView actvCategory, actvWallet;
-    private TextInputEditText etDescription;
+    private TextInputEditText etDescription, etDate;
     private MaterialButton btnContinue;
     private SwitchMaterial switchRepeat;
 
@@ -53,130 +62,143 @@ public class AddTransactionActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private StorageReference storageRef;
 
-    private Uri imageUri;
     private String attachmentUrl = null;
+    private long selectedTimestamp;
+    private Uri cameraImageUri;
 
-    private static final int CAMERA_PERMISSION_CODE = 100;
-    private static final int STORAGE_PERMISSION_CODE = 101;
+    private boolean isUploading = false;
 
-    private ActivityResultLauncher<Intent> cameraLauncher;
-    private ActivityResultLauncher<Intent> galleryLauncher;
+    private ActivityResultLauncher<String> requestCameraPermissionLauncher;
+    private ActivityResultLauncher<String> requestReadStoragePermissionLauncher;
+
+    private ActivityResultLauncher<Uri> takePictureLauncher;
+    private ActivityResultLauncher<PickVisualMediaRequest> photoPickerLauncher;
+    private ActivityResultLauncher<Intent> legacyGalleryLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
 
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
+        storageRef = FirebaseStorage.getInstance().getReference();
 
-        // Initialize views
         etAmount = findViewById(R.id.etAmount);
         actvCategory = findViewById(R.id.actvCategory);
         actvWallet = findViewById(R.id.actvWallet);
         etDescription = findViewById(R.id.etDescription);
-        btnContinue = findViewById(R.id.btnContinue);
-        btnContinue.setEnabled(true);
-        btnContinue.setText("Continue");
+        etDate = findViewById(R.id.etDate);
 
+        btnContinue = findViewById(R.id.btnContinue);
         ImageButton btnBack = findViewById(R.id.btnBack);
-        LinearLayout layoutAttachment = findViewById(R.id.layoutAttachment);
-        TextView tvTitle = findViewById(R.id.tvTitle);
-        LinearLayout rootLayout = findViewById(R.id.rootLayout);
+        LinearLayout layoutAttachmentRow = findViewById(R.id.layoutAttachmentRow);
+        attachmentPreviewContainer = findViewById(R.id.attachmentPreviewContainer);
+        imgAttachmentPreview = findViewById(R.id.imgAttachmentPreview);
+        btnRemoveAttachment = findViewById(R.id.btnRemoveAttachment);
+
+        attachmentPreviewContainer.setVisibility(View.GONE);
+        btnRemoveAttachment.setOnClickListener(v -> {
+            attachmentUrl = null;
+            attachmentPreviewContainer.setVisibility(View.GONE);
+            imgAttachmentPreview.setImageDrawable(null);
+            Toast.makeText(this, "Attachment removed", Toast.LENGTH_SHORT).show();
+        });
+
         switchRepeat = findViewById(R.id.switchRepeat);
 
-        // Setup activity result launchers
         setupActivityResultLaunchers();
-
-        // Setup category dropdown
-        String[] categories = {"Shopping", "Subscription", "Food", "Transport", "Salary", "Other"};
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, categories);
-        actvCategory.setAdapter(categoryAdapter);
-
-        // Setup wallet dropdown
-        String[] wallets = {"Cash", "Bank Account", "Credit Card", "E-Wallet"};
-        ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, wallets);
-        actvWallet.setAdapter(walletAdapter);
-
-        // Amount input formatting
+        setupDropdowns();
         setupAmountInput();
 
-        // Back button
+        selectedTimestamp = System.currentTimeMillis();
+        updateDateUi(selectedTimestamp);
+
         btnBack.setOnClickListener(v -> finish());
+        layoutAttachmentRow.setOnClickListener(v -> showAttachmentOptions());
+        etDate.setOnClickListener(v -> showDatePicker());
 
-        // Attachment click
-        if (layoutAttachment != null) {
-            layoutAttachment.setOnClickListener(v -> showAttachmentOptions());
-        }
-
-        // Continue button
         btnContinue.setOnClickListener(v -> saveTransaction());
+        setContinueStateIdle();
+    }
+
+    private void setupDropdowns() {
+        String[] categories = {"Shopping", "Subscription", "Food", "Transport", "Salary", "Other"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, categories);
+        actvCategory.setAdapter(categoryAdapter);
+
+        String[] wallets = {"Cash", "Bank Account", "Credit Card", "E-Wallet"};
+        ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, wallets);
+        actvWallet.setAdapter(walletAdapter);
     }
 
     private void setupAmountInput() {
         etAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @SuppressLint("SetTextI18n")
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() > 0 && !s.toString().startsWith("$")) {
-                    etAmount.setText("$" + s.toString().replace("$", ""));
+            @Override public void afterTextChanged(Editable s) {
+                if (s == null) return;
+                String text = s.toString();
+                if (!text.isEmpty() && !text.startsWith("$")) {
+                    etAmount.removeTextChangedListener(this);
+                    etAmount.setText("$" + text.replace("$", ""));
                     etAmount.setSelection(etAmount.getText().length());
+                    etAmount.addTextChangedListener(this);
                 }
             }
         });
     }
 
     private void setupActivityResultLaunchers() {
-        // Camera launcher
-        cameraLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        Bundle extras = result.getData().getExtras();
-                        assert extras != null;
-                        Bitmap imageBitmap = (Bitmap) extras.get("data");
-                        if (imageBitmap != null) {
-                            uploadImageToFirebase(imageBitmap);
-                        }
-                    }
-                }
-        );
 
-        // Gallery launcher
-        galleryLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        imageUri = result.getData().getData();
-                        if (imageUri != null) {
-                            uploadImageUriToFirebase(imageUri);
-                        }
+        requestCameraPermissionLauncher =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                    if (granted) openCamera();
+                    else Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+                });
+
+        requestReadStoragePermissionLauncher =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                    if (granted) openGallery();
+                    else Toast.makeText(this, "Gallery permission denied", Toast.LENGTH_SHORT).show();
+                });
+
+        takePictureLauncher =
+                registerForActivityResult(new ActivityResultContracts.TakePicture(), success -> {
+                    if (success && cameraImageUri != null) {
+                        uploadImageUriToFirebase(cameraImageUri);
                     }
-                }
-        );
+                });
+
+        photoPickerLauncher =
+                registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
+                    if (uri != null) uploadImageUriToFirebase(uri);
+                });
+
+        legacyGalleryLauncher =
+                registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri uri = result.getData().getData();
+                        if (uri != null) uploadImageUriToFirebase(uri);
+                    }
+                });
     }
 
     private void showAttachmentOptions() {
-        String[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
+        String[] options = {"Take Photo", "Choose from Gallery", "Remove Attachment", "Cancel"};
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add Attachment")
+        new AlertDialog.Builder(this)
+                .setTitle("Add Attachment")
                 .setItems(options, (dialog, which) -> {
-                    if (which == 0) {
-                        checkCameraPermissionAndOpen();
-                    } else if (which == 1) {
-                        checkStoragePermissionAndOpen();
+                    if (which == 0) checkCameraPermissionAndOpen();
+                    else if (which == 1) checkGalleryPermissionAndOpen();
+                    else if (which == 2) {
+                        attachmentUrl = null;
+                        Toast.makeText(this, "Attachment removed", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .show();
@@ -184,127 +206,162 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private void checkCameraPermissionAndOpen() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
-        } else {
+                == PackageManager.PERMISSION_GRANTED) {
             openCamera();
-        }
-    }
-
-    private void checkStoragePermissionAndOpen() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_MEDIA_IMAGES}, STORAGE_PERMISSION_CODE);
-            } else {
-                openGallery();
-            }
         } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-            } else {
-                openGallery();
-            }
+            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
+    private void checkGalleryPermissionAndOpen() {
+        // Android 13+ Photo Picker needs no permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            openGallery();
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            openGallery();
+        } else {
+            requestReadStoragePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+    }
+
     private void openCamera() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-            cameraLauncher.launch(cameraIntent);
-        } else {
-            Toast.makeText(this, "Camera not available", Toast.LENGTH_SHORT).show();
+        try {
+            File picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            if (picturesDir == null) {
+                Toast.makeText(this, "Storage not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            File imageFile = File.createTempFile(
+                    "receipt_" + System.currentTimeMillis(),
+                    ".jpg",
+                    picturesDir
+            );
+
+            // Your manifest uses ${applicationId}.fileprovider
+            cameraImageUri = FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".fileprovider",
+                    imageFile
+            );
+
+            takePictureLauncher.launch(cameraImageUri);
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Camera error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void openGallery() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        galleryLauncher.launch(galleryIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            photoPickerLauncher.launch(
+                    new PickVisualMediaRequest.Builder()
+                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                            .build()
+            );
+        } else {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            legacyGalleryLauncher.launch(intent);
+        }
+    }
+
+    private void showDatePicker() {
+        final Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(selectedTimestamp);
+
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog dialog = new DatePickerDialog(
+                this,
+                (view, y, m, d) -> {
+                    Calendar picked = Calendar.getInstance();
+                    picked.set(Calendar.YEAR, y);
+                    picked.set(Calendar.MONTH, m);
+                    picked.set(Calendar.DAY_OF_MONTH, d);
+
+                    // Keep time-of-day from "now"
+                    Calendar now = Calendar.getInstance();
+                    picked.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY));
+                    picked.set(Calendar.MINUTE, now.get(Calendar.MINUTE));
+                    picked.set(Calendar.SECOND, 0);
+                    picked.set(Calendar.MILLISECOND, 0);
+
+                    selectedTimestamp = picked.getTimeInMillis();
+                    updateDateUi(selectedTimestamp);
+                },
+                year, month, day
+        );
+        dialog.show();
+    }
+
+    private void updateDateUi(long ts) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        etDate.setText(sdf.format(new java.util.Date(ts)));
     }
 
     @SuppressLint("SetTextI18n")
-    private void uploadImageToFirebase(Bitmap bitmap) {
+    private void setContinueStateUploading() {
+        isUploading = true;
         btnContinue.setEnabled(false);
         btnContinue.setText("Uploading...");
+    }
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-        byte[] data = baos.toByteArray();
-
-        assert mAuth.getCurrentUser() != null;
-        String userId = mAuth.getCurrentUser().getUid();
-        String fileName = "receipts/" + userId + "/" + System.currentTimeMillis() + ".jpg";
-        StorageReference fileRef = storageRef.child(fileName);
-
-        fileRef.putBytes(data)
-                .addOnSuccessListener(taskSnapshot -> fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    attachmentUrl = uri.toString();
-                    Toast.makeText(this, "✅ Attachment uploaded!", Toast.LENGTH_SHORT).show();
-                    btnContinue.setEnabled(true);
-                    btnContinue.setText("Continue");
-                }))
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "❌ Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnContinue.setEnabled(true);
-                    btnContinue.setText("Continue");
-                });
+    @SuppressLint("SetTextI18n")
+    private void setContinueStateIdle() {
+        isUploading = false;
+        btnContinue.setEnabled(true);
+        btnContinue.setText("Continue");
     }
 
     @SuppressLint("SetTextI18n")
     private void uploadImageUriToFirebase(Uri uri) {
-        btnContinue.setEnabled(false);
-        btnContinue.setText("Uploading...");
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        assert mAuth.getCurrentUser() != null;
+        setContinueStateUploading();
+
         String userId = mAuth.getCurrentUser().getUid();
         String fileName = "receipts/" + userId + "/" + System.currentTimeMillis() + ".jpg";
         StorageReference fileRef = storageRef.child(fileName);
 
         fileRef.putFile(uri)
-                .addOnSuccessListener(taskSnapshot -> fileRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                    attachmentUrl = downloadUri.toString();
-                    Toast.makeText(this, "✅ Attachment uploaded!", Toast.LENGTH_SHORT).show();
-                    btnContinue.setEnabled(true);
-                    btnContinue.setText("Continue");
-                }))
+                .addOnSuccessListener(taskSnapshot ->
+                        taskSnapshot.getStorage().getDownloadUrl()
+                                .addOnSuccessListener(downloadUri -> {
+                                    attachmentUrl = downloadUri.toString();
+
+                                    Glide.with(this)
+                                            .load(uri)  // show immediately from local uri
+                                            .into(imgAttachmentPreview);
+                                    attachmentPreviewContainer.setVisibility(View.VISIBLE);
+
+                                    Toast.makeText(this, "✅ Attachment uploaded!", Toast.LENGTH_SHORT).show();
+                                    setContinueStateIdle();
+                                })
+
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "❌ URL failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    setContinueStateIdle();
+                                })
+                )
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "❌ Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnContinue.setEnabled(true);
-                    btnContinue.setText("Continue");
+                    Toast.makeText(this, "❌ Upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    setContinueStateIdle();
                 });
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera();
-            } else {
-                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
-            }
-        } else if (requestCode == STORAGE_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openGallery();
-            } else {
-                Toast.makeText(this, "Storage permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     @SuppressLint("SetTextI18n")
     private void saveTransaction() {
-
-        // If currently uploading, block saving (optional safety)
-        if ("Uploading...".contentEquals(btnContinue.getText())) {
-            Toast.makeText(this, "Please wait for upload to finish (or cancel attachment).", Toast.LENGTH_SHORT).show();
+        if (isUploading) {
+            Toast.makeText(this, "Please wait for upload to finish.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -321,13 +378,11 @@ public class AddTransactionActivity extends AppCompatActivity {
             etAmount.requestFocus();
             return;
         }
-
         if (TextUtils.isEmpty(category)) {
             Toast.makeText(this, "⚠️ Please select category", Toast.LENGTH_SHORT).show();
             actvCategory.requestFocus();
             return;
         }
-
         if (TextUtils.isEmpty(wallet)) {
             Toast.makeText(this, "⚠️ Please select wallet", Toast.LENGTH_SHORT).show();
             actvWallet.requestFocus();
@@ -357,10 +412,9 @@ public class AddTransactionActivity extends AppCompatActivity {
         transaction.put("wallet", wallet);
         transaction.put("description", description);
         transaction.put("type", type);
-        transaction.put("timestamp", System.currentTimeMillis());
+        transaction.put("timestamp", selectedTimestamp);
         transaction.put("isRepeated", switchRepeat.isChecked());
 
-        // Attachment is OPTIONAL
         if (attachmentUrl != null && !attachmentUrl.trim().isEmpty()) {
             transaction.put("attachmentUrl", attachmentUrl);
         }
@@ -376,10 +430,14 @@ public class AddTransactionActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnContinue.setEnabled(true);
-                    btnContinue.setText("Continue");
+                    setContinueStateIdle();
                 });
     }
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
 }
