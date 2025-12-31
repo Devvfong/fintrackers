@@ -50,7 +50,10 @@ import java.util.Objects;
 public class AddTransactionActivity extends AppCompatActivity {
     private ImageView imgAttachmentPreview;
     private View attachmentPreviewContainer;
-    private ImageButton btnRemoveAttachment;
+
+    private boolean isEditMode = false;
+    private String editingTransactionId = null;
+    private String existingAttachmentUrl = null;
 
     private EditText etAmount;
     private AutoCompleteTextView actvCategory, actvWallet;
@@ -75,6 +78,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private ActivityResultLauncher<PickVisualMediaRequest> photoPickerLauncher;
     private ActivityResultLauncher<Intent> legacyGalleryLauncher;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +99,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         LinearLayout layoutAttachmentRow = findViewById(R.id.layoutAttachmentRow);
         attachmentPreviewContainer = findViewById(R.id.attachmentPreviewContainer);
         imgAttachmentPreview = findViewById(R.id.imgAttachmentPreview);
-        btnRemoveAttachment = findViewById(R.id.btnRemoveAttachment);
+        ImageButton btnRemoveAttachment = findViewById(R.id.btnRemoveAttachment);
 
         attachmentPreviewContainer.setVisibility(View.GONE);
         btnRemoveAttachment.setOnClickListener(v -> {
@@ -106,6 +110,38 @@ public class AddTransactionActivity extends AppCompatActivity {
         });
 
         switchRepeat = findViewById(R.id.switchRepeat);
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("editMode", false)) {
+            isEditMode = true;
+            editingTransactionId = intent.getStringExtra("transactionId");
+
+            String amount = intent.getStringExtra("amount");
+            String category = intent.getStringExtra("category");
+            String wallet = intent.getStringExtra("wallet");
+            String description = intent.getStringExtra("description");
+            long ts = intent.getLongExtra("timestamp", System.currentTimeMillis());
+            existingAttachmentUrl = intent.getStringExtra("attachmentUrl");
+
+            if (amount != null) etAmount.setText(amount);
+            if (category != null) actvCategory.setText(category, false);
+            if (wallet != null) actvWallet.setText(wallet, false);
+            if (description != null) etDescription.setText(description);
+
+            selectedTimestamp = ts;
+            updateDateUi(selectedTimestamp);
+
+            // show existing attachment preview if you want
+            if (existingAttachmentUrl != null && !existingAttachmentUrl.trim().isEmpty()) {
+                attachmentUrl = existingAttachmentUrl; // keep it unless user changes/removes
+                if (attachmentPreviewContainer != null) attachmentPreviewContainer.setVisibility(View.VISIBLE);
+                if (imgAttachmentPreview != null) {
+                    com.bumptech.glide.Glide.with(this).load(existingAttachmentUrl).into(imgAttachmentPreview);
+                }
+            }
+
+            btnContinue.setText("Update");
+        }
+
 
         setupActivityResultLaunchers();
         setupDropdowns();
@@ -422,16 +458,31 @@ public class AddTransactionActivity extends AppCompatActivity {
         btnContinue.setEnabled(false);
         btnContinue.setText("Saving...");
 
-        db.collection("transactions")
-                .add(transaction)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, "✅ Transaction added successfully!", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    setContinueStateIdle();
-                });
+        if (isEditMode && editingTransactionId != null && !editingTransactionId.trim().isEmpty()) {
+            db.collection("transactions")
+                    .document(editingTransactionId)
+                    .update(transaction)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Transaction updated successfully!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Update error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        setContinueStateIdle();
+                    });
+        } else {
+            db.collection("transactions")
+                    .add(transaction)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(this, "Transaction added successfully!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        setContinueStateIdle();
+                    });
+        }
+
     }
 
     @Override
@@ -439,5 +490,29 @@ public class AddTransactionActivity extends AppCompatActivity {
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public boolean isEditMode() {
+        return isEditMode;
+    }
+
+    public void setEditMode(boolean editMode) {
+        isEditMode = editMode;
+    }
+
+    public String getEditingTransactionId() {
+        return editingTransactionId;
+    }
+
+    public void setEditingTransactionId(String editingTransactionId) {
+        this.editingTransactionId = editingTransactionId;
+    }
+
+    public String getExistingAttachmentUrl() {
+        return existingAttachmentUrl;
+    }
+
+    public void setExistingAttachmentUrl(String existingAttachmentUrl) {
+        this.existingAttachmentUrl = existingAttachmentUrl;
     }
 }

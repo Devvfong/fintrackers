@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,15 +22,15 @@ import java.util.List;
 
 public class TransactionFragment extends Fragment {
 
-    private RecyclerView recyclerView;
     private TransactionAdapter adapter;
-    private List<Transaction> transactionList = new ArrayList<>();
+    private final List<Transaction> transactionList = new ArrayList<>();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_transaction, container, false);
+
     }
 
     @Override
@@ -39,11 +40,24 @@ public class TransactionFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        recyclerView = view.findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setNestedScrollingEnabled(false);
 
         adapter = new TransactionAdapter(getContext(), transactionList);
+        recyclerView.setAdapter(adapter);
+        adapter = new TransactionAdapter(getContext(), transactionList, transaction -> {
+            android.content.Intent i = new android.content.Intent(requireContext(), AddTransactionActivity.class);
+            i.putExtra("editMode", true);
+            i.putExtra("transactionId", transaction.getId());
+            i.putExtra("amount", String.valueOf(transaction.getAmount()));
+            i.putExtra("category", transaction.getCategory());
+            i.putExtra("wallet", transaction.getWallet());
+            i.putExtra("description", transaction.getDescription());
+            i.putExtra("timestamp", transaction.getTimestamp());
+            i.putExtra("attachmentUrl", transaction.getAttachmentUrl());
+            startActivity(i);
+        });
         recyclerView.setAdapter(adapter);
 
         loadTransactions();
@@ -87,11 +101,10 @@ public class TransactionFragment extends Fragment {
                     adapter.notifyItemRemoved(position);
                     Toast.makeText(getContext(), "Deleted", Toast.LENGTH_SHORT).show();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Delete failed", Toast.LENGTH_SHORT).show());
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void loadTransactions() {
         if (mAuth.getCurrentUser() == null) return;
 

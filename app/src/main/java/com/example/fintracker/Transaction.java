@@ -1,28 +1,26 @@
 package com.example.fintracker;
 
-
 public class Transaction {
+
     private String id;
     private String userId;
-    private String type; // "income", "expense", "transfer"
+    private String type; // "Income", "Expense", "Transfer"
     private double amount;
     private String category;
-    private String wallet; // account/wallet name
+    private String wallet;
     private String description;
-    private String attachmentUrl; // Firebase Storage URL for receipt
+    private String attachmentUrl;
     private long timestamp;
+
     private boolean isRepeated;
-    private String repeatFrequency; // "daily", "weekly", "monthly", "yearly"
+    private String repeatFrequency; // "daily","weekly","monthly","yearly"
     private long repeatEndDate;
 
-    // For transfers
     private String fromWallet;
     private String toWallet;
 
-    // Constructors
-    public Transaction() {
-        // Required for Firebase
-    }
+    // Required for Firebase
+    public Transaction() { }
 
     public Transaction(String userId, String type, double amount, String category,
                        String wallet, String description, long timestamp) {
@@ -36,116 +34,45 @@ public class Transaction {
         this.isRepeated = false;
     }
 
-    // Getters and Setters
-    public String getId() {
-        return id;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
-    public String getUserId() {
-        return userId;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public double getAmount() { return amount; }
+    public void setAmount(double amount) { this.amount = amount; }
 
-    public String getType() {
-        return type;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public String getWallet() { return wallet; }
+    public void setWallet(String wallet) { this.wallet = wallet; }
 
-    public double getAmount() {
-        return amount;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
+    public String getAttachmentUrl() { return attachmentUrl; }
+    public void setAttachmentUrl(String attachmentUrl) { this.attachmentUrl = attachmentUrl; }
 
-    public String getCategory() {
-        return category;
-    }
+    public long getTimestamp() { return timestamp; }
+    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    public boolean isRepeated() { return isRepeated; }
+    public void setRepeated(boolean repeated) { isRepeated = repeated; }
 
-    public String getWallet() {
-        return wallet;
-    }
+    public String getRepeatFrequency() { return repeatFrequency; }
+    public void setRepeatFrequency(String repeatFrequency) { this.repeatFrequency = repeatFrequency; }
 
-    public void setWallet(String wallet) {
-        this.wallet = wallet;
-    }
+    public long getRepeatEndDate() { return repeatEndDate; }
+    public void setRepeatEndDate(long repeatEndDate) { this.repeatEndDate = repeatEndDate; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getFromWallet() { return fromWallet; }
+    public void setFromWallet(String fromWallet) { this.fromWallet = fromWallet; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getAttachmentUrl() {
-        return attachmentUrl;
-    }
-
-    public void setAttachmentUrl(String attachmentUrl) {
-        this.attachmentUrl = attachmentUrl;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public boolean isRepeated() {
-        return isRepeated;
-    }
-
-    public void setRepeated(boolean repeated) {
-        isRepeated = repeated;
-    }
-
-    public String getRepeatFrequency() {
-        return repeatFrequency;
-    }
-
-    public void setRepeatFrequency(String repeatFrequency) {
-        this.repeatFrequency = repeatFrequency;
-    }
-
-    public long getRepeatEndDate() {
-        return repeatEndDate;
-    }
-
-    public void setRepeatEndDate(long repeatEndDate) {
-        this.repeatEndDate = repeatEndDate;
-    }
-
-    public String getFromWallet() {
-        return fromWallet;
-    }
-
-    public void setFromWallet(String fromWallet) {
-        this.fromWallet = fromWallet;
-    }
-
-    public String getToWallet() {
-        return toWallet;
-    }
-
-    public void setToWallet(String toWallet) {
-        this.toWallet = toWallet;
-    }
+    public String getToWallet() { return toWallet; }
+    public void setToWallet(String toWallet) { this.toWallet = toWallet; }
 }

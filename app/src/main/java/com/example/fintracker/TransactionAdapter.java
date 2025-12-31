@@ -20,25 +20,35 @@ import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
-    private final Context context;
-    private final List<Transaction> transactionList;
-
-    public TransactionAdapter(Context context, List<Transaction> transactionList) {
-        this.context = context;
-        this.transactionList = transactionList;
+    public interface OnTransactionClickListener {
+        void onTransactionClick(Transaction transaction);
     }
 
-    // Add this method to your existing TransactionAdapter
+    private final Context context;
+    private final List<Transaction> transactionList;
+    private final OnTransactionClickListener listener;
+
+    // Default constructor (no click)
+    public TransactionAdapter(Context context, List<Transaction> transactionList) {
+        this(context, transactionList, null);
+    }
+
+    // Constructor with click listener (for edit)
+    public TransactionAdapter(Context context, List<Transaction> transactionList, OnTransactionClickListener listener) {
+        this.context = context;
+        this.transactionList = transactionList;
+        this.listener = listener;
+    }
+
     public void removeItem(int position) {
+        if (position < 0 || position >= transactionList.size()) return;
         transactionList.remove(position);
         notifyItemRemoved(position);
     }
 
-
-    // 🔥 ADD THIS METHOD - FIXES 1-ITEM PROBLEM
     public void updateTransactions(List<Transaction> newTransactions) {
-        this.transactionList.clear();
-        this.transactionList.addAll(newTransactions);
+        transactionList.clear();
+        transactionList.addAll(newTransactions);
         notifyDataSetChanged();
     }
 
@@ -78,9 +88,14 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.tvTime.setText(timeFormat.format(new Date(transaction.getTimestamp())));
 
         setCategoryIcon(holder, transaction.getCategory());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onTransactionClick(transaction);
+        });
     }
 
     private void setCategoryIcon(TransactionViewHolder holder, String category) {
+        // Icons
         int iconRes;
         if ("Shopping".equals(category)) {
             iconRes = android.R.drawable.ic_menu_gallery;
@@ -96,6 +111,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             iconRes = android.R.drawable.ic_menu_more;
         }
 
+        // Background colors
         int bgColorRes;
         if ("Shopping".equals(category)) {
             bgColorRes = R.color.category_shopping;
