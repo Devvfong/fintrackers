@@ -29,7 +29,6 @@ public class TransactionFragment extends Fragment {
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
     private final List<Transaction> transactionList = new ArrayList<>();
-
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
@@ -59,12 +58,15 @@ public class TransactionFragment extends Fragment {
 
             @Override
             public void onRowClick(@NonNull Transaction transaction) {
-                // Optional: open details
+                // ✅ FIXED: Pass transaction ID instead of object
+                Intent intent = new Intent(requireContext(), TransactionDetailActivity.class);
+                intent.putExtra("transactionId", transaction.getId());
+                startActivity(intent);
             }
+
         });
 
         recyclerView.setAdapter(adapter);
-
         attachSwipeToDelete();
         loadTransactions();
     }
@@ -85,7 +87,6 @@ public class TransactionFragment extends Fragment {
     private void attachSwipeToDelete() {
         ItemTouchHelper.SimpleCallback swipeCallback =
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-
                     @Override
                     public boolean onMove(@NonNull RecyclerView recyclerView,
                                           @NonNull RecyclerView.ViewHolder viewHolder,
@@ -99,13 +100,11 @@ public class TransactionFragment extends Fragment {
                         showDeleteConfirmation(position);
                     }
                 };
-
         new ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView);
     }
 
     private void showDeleteConfirmation(int position) {
         if (position < 0 || position >= transactionList.size()) return;
-
         Transaction transaction = transactionList.get(position);
 
         new AlertDialog.Builder(requireContext())
@@ -154,7 +153,6 @@ public class TransactionFragment extends Fragment {
                             newList.add(t);
                         }
                     }
-
                     adapter.updateTransactions(newList);
                 });
     }

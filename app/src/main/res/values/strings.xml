@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string name="type">Type</string>
+    <string name="attachment">Attachment</string>
+
+
     <string name="msg_camera_denied">Camera access denied</string>
     <string name="msg_gallery_denied">Gallery access denied</string>
     <string name="msg_storage_unavailable">Storage unavailable</string>
-
+    <string name="detail_transaction">Detail Transaction</string>
 
     <string name="app_name">FinTrack</string>
     <string name="date">Date</string>

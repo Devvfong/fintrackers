@@ -8,6 +8,7 @@
 
     <!-- Header -->
     <TextView
+        android:layout_marginTop="30dp"
         android:id="@+id/tvMonth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
