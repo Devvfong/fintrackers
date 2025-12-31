@@ -7,12 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,24 +26,12 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     @NonNull private final Context context;
     @NonNull private final List<Transaction> transactionList;
-    private final Listener listener;
+    @NonNull private final Listener listener;
 
-    // ✅ BACKWARD COMPATIBLE for HomeFragment
-    public TransactionAdapter(@NonNull Context context, @NonNull List<Transaction> transactionList) {
-        this(context, transactionList, null);
-    }
-
-    // ✅ MAIN constructor for TransactionFragment
-    public TransactionAdapter(@NonNull Context context, @NonNull List<Transaction> transactionList, Listener listener) {
+    public TransactionAdapter(@NonNull Context context, @NonNull List<Transaction> transactionList, @NonNull Listener listener) {
         this.context = context;
         this.transactionList = transactionList;
         this.listener = listener;
-    }
-
-    public void removeItem(int position) {
-        if (position < 0 || position >= transactionList.size()) return;
-        transactionList.remove(position);
-        notifyItemRemoved(position);
     }
 
     public void updateTransactions(@NonNull List<Transaction> newTransactions) {
@@ -70,56 +56,24 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         String desc = transaction.getDescription();
         if (desc != null && !desc.trim().isEmpty()) {
             holder.tvDescription.setText(desc);
-            holder.tvDescription.setVisibility(View.VISIBLE);
         } else {
-            holder.tvDescription.setVisibility(View.GONE);
+            holder.tvDescription.setText("");
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
-        if ("Income".equals(transaction.getType())) {
-            holder.tvAmount.setText("+ " + formatter.format(transaction.getAmount()));
-            holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.green_income));
-        } else {
-            holder.tvAmount.setText("- " + formatter.format(transaction.getAmount()));
-            holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.red_expense));
-        }
+        boolean isIncome = "Income".equals(transaction.getType());
+        holder.tvAmount.setText((isIncome ? "+ " : "- ") + formatter.format(transaction.getAmount()));
+        holder.tvAmount.setTextColor(ContextCompat.getColor(context,
+                isIncome ? android.R.color.holo_green_dark : android.R.color.holo_red_dark));
 
         SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         holder.tvTime.setText(timeFormat.format(new Date(transaction.getTimestamp())));
 
+        // YOUR EXACT ICONS FROM LAYOUT
         setCategoryIcon(holder, transaction.getCategory());
 
-        // ✅ EDIT ICON CLICK
-        if (listener != null) {
-            holder.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
-            holder.itemView.setOnClickListener(v -> listener.onRowClick(transaction));
-        }
-    }
-
-    private void setCategoryIcon(@NonNull TransactionViewHolder holder, String category) {
-        int iconRes = android.R.drawable.ic_menu_more;
-        int bgColorRes = R.color.border_light;
-
-        if ("Shopping".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_gallery;
-            bgColorRes = R.color.category_shopping;
-        } else if ("Subscription".equals(category)) {
-            iconRes = android.R.drawable.ic_dialog_info;
-            bgColorRes = R.color.category_subscription;
-        } else if ("Food".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_info_details;
-            bgColorRes = R.color.category_food;
-        } else if ("Salary".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_agenda;
-            bgColorRes = R.color.category_salary;
-        } else if ("Transport".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_directions;
-            bgColorRes = R.color.category_transport;
-        }
-
-        holder.ivCategoryIcon.setImageResource(iconRes);
-        holder.ivCategoryIcon.setColorFilter(ContextCompat.getColor(context, android.R.color.white));
-        holder.cvCategoryIcon.setCardBackgroundColor(ContextCompat.getColor(context, bgColorRes));
+        holder.itemView.setOnClickListener(v -> listener.onRowClick(transaction));
+        holder.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
     }
 
     @Override
@@ -127,21 +81,50 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         return transactionList.size();
     }
 
+    private void setCategoryIcon(TransactionViewHolder holder, String category) {
+        int iconRes = android.R.drawable.ic_menu_info_details;
+
+        switch (category) {
+            case "Salary":
+                iconRes = android.R.drawable.ic_menu_add;           // ✨ + (Growth)
+                holder.cvCategoryIcon.setCardBackgroundColor(0xFF4CAF50);  // Green
+                break;
+            case "Food":
+                iconRes = android.R.drawable.ic_menu_preferences;   // 🍲 Food menu
+                holder.cvCategoryIcon.setCardBackgroundColor(0xFFFF9800);  // Orange
+                break;
+            case "Shopping":
+                iconRes = android.R.drawable.ic_dialog_map;         // 🛒 Shopping bag
+                holder.cvCategoryIcon.setCardBackgroundColor(0xFF2196F3);  // Blue
+                break;
+            case "Subscription":
+                iconRes = android.R.drawable.ic_lock_lock;          // 🔒 Recurring
+                holder.cvCategoryIcon.setCardBackgroundColor(0xFF9C27B0);  // Purple
+                break;
+        }
+
+        holder.ivCategoryIcon.setImageResource(iconRes);
+        holder.ivCategoryIcon.setColorFilter(0xFFFFFFFF); // White
+    }
+
+
+
+
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
+        TextView tvCategory, tvDescription, tvAmount, tvTime;
         CardView cvCategoryIcon;
         ImageView ivCategoryIcon;
-        TextView tvCategory, tvDescription, tvAmount, tvTime;
-        ImageButton btnEdit; // ✅ MISSING BEFORE
+        ImageButton btnEdit;
 
         TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
-            cvCategoryIcon = itemView.findViewById(R.id.cvCategoryIcon);
-            ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvAmount = itemView.findViewById(R.id.tvAmount);
             tvTime = itemView.findViewById(R.id.tvTime);
-            btnEdit = itemView.findViewById(R.id.btnEdit); // ✅ FIXED
+            cvCategoryIcon = itemView.findViewById(R.id.cvCategoryIcon);
+            ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);  // ✅ YOUR EXACT ID
+            btnEdit = itemView.findViewById(R.id.btnEdit);
         }
     }
 }

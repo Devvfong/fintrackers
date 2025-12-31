@@ -1,39 +1,14 @@
 package com.example.fintracker;
 
 public class Transaction {
-
-    private String id;
-    private String userId;
-    private String type; // "Income", "Expense", "Transfer"
+    private String id, userId, type, category, wallet, description, attachmentUrl;
     private double amount;
-    private String category;
-    private String wallet;
-    private String description;
-    private String attachmentUrl;
     private long timestamp;
+    private boolean isRepeated = false;  // ✅ ADD THIS LINE
 
-    private boolean isRepeated;
-    private String repeatFrequency; // "daily","weekly","monthly","yearly"
-    private long repeatEndDate;
+    public Transaction() {}
 
-    private String fromWallet;
-    private String toWallet;
-
-    // Required for Firebase
-    public Transaction() { }
-
-    public Transaction(String userId, String type, double amount, String category,
-                       String wallet, String description, long timestamp) {
-        this.userId = userId;
-        this.type = type;
-        this.amount = amount;
-        this.category = category;
-        this.wallet = wallet;
-        this.description = description;
-        this.timestamp = timestamp;
-        this.isRepeated = false;
-    }
-
+    // Getters/Setters (ALL)
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -61,18 +36,7 @@ public class Transaction {
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
+    // ✅ ADD THESE 2 METHODS:
     public boolean isRepeated() { return isRepeated; }
     public void setRepeated(boolean repeated) { isRepeated = repeated; }
-
-    public String getRepeatFrequency() { return repeatFrequency; }
-    public void setRepeatFrequency(String repeatFrequency) { this.repeatFrequency = repeatFrequency; }
-
-    public long getRepeatEndDate() { return repeatEndDate; }
-    public void setRepeatEndDate(long repeatEndDate) { this.repeatEndDate = repeatEndDate; }
-
-    public String getFromWallet() { return fromWallet; }
-    public void setFromWallet(String fromWallet) { this.fromWallet = fromWallet; }
-
-    public String getToWallet() { return toWallet; }
-    public void setToWallet(String toWallet) { this.toWallet = toWallet; }
 }

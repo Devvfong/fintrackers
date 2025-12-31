@@ -29,7 +29,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="20dp" />
 
-        <!-- Month Filter -->
+        <!-- ✅ FIXED: "All Transactions" + Filter (SAME ROW) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,19 +37,21 @@
             android:paddingStart="20dp"
             android:paddingTop="16dp"
             android:paddingEnd="20dp"
-            android:paddingBottom="12dp">
+            android:paddingBottom="12dp"
+            android:gravity="center_vertical">
 
-            <Spinner
-                android:id="@+id/spinnerMonth"
+            <!-- "All Transactions" Text -->
+            <TextView
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/border_rounded_light"
-                android:contentDescription="TODO"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                tools:ignore="RtlSymmetry" />
+                android:text="All Transactions"
+                android:textSize="20sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:gravity="center_vertical" />
 
+            <!-- Filter Icon -->
             <ImageButton
                 android:id="@+id/btnFilter"
                 android:layout_width="44dp"
@@ -59,35 +61,8 @@
                 android:scaleType="centerInside"
                 android:src="@android:drawable/ic_menu_sort_by_size"
                 app:tint="@color/purple_primary"
+                android:contentDescription="Filter transactions"
                 tools:ignore="TouchTargetSizeCheck" />
-
-        </LinearLayout>
-
-        <!-- Report Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="20dp">
-
-<!--            <TextView-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="@string/see_financial_report"-->
-<!--                android:textSize="14sp"-->
-<!--                android:textColor="@color/purple_primary"-->
-<!--                android:fontFamily="sans-serif-medium" />-->
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/today"
-                android:textSize="20sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp" />
 
         </LinearLayout>
 
@@ -109,8 +84,7 @@
             android:paddingBottom="100dp"
             tools:listitem="@layout/item_transaction" />
 
-
-        <!-- Empty State - UPDATE THESE 2 lines only -->
+        <!-- Empty State -->
         <LinearLayout
             android:id="@+id/layoutEmpty"
             android:layout_width="match_parent"
@@ -143,7 +117,6 @@
                 android:layout_marginTop="8dp" />
 
         </LinearLayout>
-
 
     </LinearLayout>
 

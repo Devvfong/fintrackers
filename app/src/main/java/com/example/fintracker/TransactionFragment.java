@@ -2,8 +2,10 @@ package com.example.fintracker;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -11,31 +13,26 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TransactionFragment extends Fragment {
-
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
     private final List<Transaction> transactionList = new ArrayList<>();
+    private final List<Transaction> allTransactions = new ArrayList<>();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_transaction, container, false);
     }
 
@@ -48,92 +45,22 @@ public class TransactionFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setNestedScrollingEnabled(false);
 
         adapter = new TransactionAdapter(requireContext(), transactionList, new TransactionAdapter.Listener() {
-            @Override
-            public void onEditClick(@NonNull Transaction transaction) {
-                openEditTransaction(transaction);
+            @Override public void onEditClick(@NonNull Transaction t) { openEdit(t); }
+            @Override public void onRowClick(@NonNull Transaction t) {
+                Intent i = new Intent(requireContext(), TransactionDetailActivity.class);
+                i.putExtra("transactionId", t.getId());
+                startActivity(i);
             }
-
-            @Override
-            public void onRowClick(@NonNull Transaction transaction) {
-                // ✅ FIXED: Pass transaction ID instead of object
-                Intent intent = new Intent(requireContext(), TransactionDetailActivity.class);
-                intent.putExtra("transactionId", transaction.getId());
-                startActivity(intent);
-            }
-
         });
-
         recyclerView.setAdapter(adapter);
-        attachSwipeToDelete();
+
+        view.findViewById(R.id.fabAddTransaction).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), AddTransactionActivity.class)));
+
+        attachSwipeDelete();
         loadTransactions();
-    }
-
-    private void openEditTransaction(@NonNull Transaction transaction) {
-        Intent i = new Intent(requireContext(), AddTransactionActivity.class);
-        i.putExtra("editMode", true);
-        i.putExtra("transactionId", transaction.getId());
-        i.putExtra("amount", String.valueOf(transaction.getAmount()));
-        i.putExtra("category", transaction.getCategory());
-        i.putExtra("wallet", transaction.getWallet());
-        i.putExtra("description", transaction.getDescription() != null ? transaction.getDescription() : "");
-        i.putExtra("timestamp", transaction.getTimestamp());
-        i.putExtra("attachmentUrl", transaction.getAttachmentUrl());
-        startActivity(i);
-    }
-
-    private void attachSwipeToDelete() {
-        ItemTouchHelper.SimpleCallback swipeCallback =
-                new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-                    @Override
-                    public boolean onMove(@NonNull RecyclerView recyclerView,
-                                          @NonNull RecyclerView.ViewHolder viewHolder,
-                                          @NonNull RecyclerView.ViewHolder target) {
-                        return false;
-                    }
-
-                    @Override
-                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                        int position = viewHolder.getAdapterPosition();
-                        showDeleteConfirmation(position);
-                    }
-                };
-        new ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView);
-    }
-
-    private void showDeleteConfirmation(int position) {
-        if (position < 0 || position >= transactionList.size()) return;
-        Transaction transaction = transactionList.get(position);
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.delete)
-                .setMessage(getString(R.string.remove) + " " + transaction.getCategory() + "?")
-                .setPositiveButton(R.string.delete, (dialog, which) -> deleteTransaction(transaction, position))
-                .setNegativeButton(R.string.cancel, (dialog, which) -> adapter.notifyItemChanged(position))
-                .setCancelable(false)
-                .show();
-    }
-
-    private void deleteTransaction(@NonNull Transaction transaction, int position) {
-        String id = transaction.getId();
-        if (id == null || id.trim().isEmpty()) {
-            adapter.notifyItemChanged(position);
-            return;
-        }
-
-        db.collection("transactions")
-                .document(id)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    adapter.removeItem(position);
-                    Toast.makeText(requireContext(), R.string.remove, Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    adapter.notifyItemChanged(position);
-                    Toast.makeText(requireContext(), R.string.todo, Toast.LENGTH_SHORT).show();
-                });
     }
 
     private void loadTransactions() {
@@ -142,18 +69,53 @@ public class TransactionFragment extends Fragment {
         db.collection("transactions")
                 .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-                .addSnapshotListener((value, error) -> {
+                .addSnapshotListener((snapshots, error) -> {
                     if (error != null) return;
-
                     List<Transaction> newList = new ArrayList<>();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document : value) {
-                            Transaction t = document.toObject(Transaction.class);
-                            t.setId(document.getId());
+                    if (snapshots != null) {
+                        for (QueryDocumentSnapshot doc : snapshots) {
+                            Transaction t = doc.toObject(Transaction.class);
+                            t.setId(doc.getId());
                             newList.add(t);
                         }
                     }
+                    allTransactions.clear();
+                    allTransactions.addAll(newList);
+                    transactionList.clear();
+                    transactionList.addAll(newList);
                     adapter.updateTransactions(newList);
                 });
+    }
+
+    private void attachSwipeDelete() {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override public boolean onMove(@NonNull RecyclerView r, @NonNull RecyclerView.ViewHolder v, @NonNull RecyclerView.ViewHolder t) { return false; }
+            @Override public void onSwiped(@NonNull RecyclerView.ViewHolder v, int d) {
+                int pos = v.getAdapterPosition();
+                Transaction t = transactionList.get(pos);
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Delete?")
+                        .setMessage("Delete " + t.getCategory() + "?")
+                        .setPositiveButton("Yes", (dd, ww) -> {
+                            if (t.getId() != null) db.collection("transactions").document(t.getId()).delete();
+                            transactionList.remove(pos);
+                            adapter.notifyItemRemoved(pos);
+                        })
+                        .setNegativeButton("No", (dd, ww) -> adapter.notifyItemChanged(pos))
+                        .show();
+            }
+        }).attachToRecyclerView(recyclerView);
+    }
+
+    private void openEdit(Transaction t) {
+        Intent i = new Intent(requireContext(), AddTransactionActivity.class);
+        i.putExtra("editMode", true);
+        i.putExtra("transactionId", t.getId());
+        i.putExtra("amount", t.getAmount());
+        i.putExtra("category", t.getCategory());
+        i.putExtra("wallet", t.getWallet());
+        i.putExtra("description", t.getDescription());
+        i.putExtra("timestamp", t.getTimestamp());
+        startActivity(i);
     }
 }

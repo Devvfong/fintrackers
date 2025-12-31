@@ -73,7 +73,11 @@ public class HomeFragment extends Fragment {
         rvRecentTransactions.setNestedScrollingEnabled(false);
 
         // ✅ FIXED: Uses 2-param constructor (backward compatible)
-        adapter = new TransactionAdapter(getContext(), recentTransactions);
+        adapter = new TransactionAdapter(
+        requireContext(),
+        recentTransactions,
+        null   // no click listener on home
+);
         rvRecentTransactions.setAdapter(adapter);
 
         setupChart();

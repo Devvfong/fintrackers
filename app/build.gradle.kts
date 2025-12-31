@@ -63,4 +63,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // ADD to build.gradle.kts
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
+
 }
