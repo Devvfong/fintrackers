@@ -85,9 +85,10 @@
                 android:layout_marginStart="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/edit"
-                android:src="@android:drawable/ic_menu_edit"
+                android:src="@drawable/edit_24px"
                 app:tint="@color/text_secondary" />
         </LinearLayout>
     </LinearLayout>
+
 
 </LinearLayout>

@@ -29,9 +29,9 @@
             <ImageView
                 android:id="@+id/ivCategoryIcon"
                 android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_shopping"
+                android:src="@drawable/shopping_bag_24px"
                 app:tint="@color/category_shopping" />
         </androidx.cardview.widget.CardView>
 

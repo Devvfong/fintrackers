@@ -53,7 +53,6 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private boolean isEditMode = false;
     private String editingTransactionId = null;
-    private String existingAttachmentUrl = null;
 
     private EditText etAmount;
     private AutoCompleteTextView actvCategory, actvWallet;
@@ -120,7 +119,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             String wallet = intent.getStringExtra("wallet");
             String description = intent.getStringExtra("description");
             long ts = intent.getLongExtra("timestamp", System.currentTimeMillis());
-            existingAttachmentUrl = intent.getStringExtra("attachmentUrl");
+            String existingAttachmentUrl = intent.getStringExtra("attachmentUrl");
 
             if (amount != null) etAmount.setText(amount);
             if (category != null) actvCategory.setText(category, false);
@@ -502,27 +501,4 @@ public class AddTransactionActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public boolean isEditMode() {
-        return isEditMode;
-    }
-
-    public void setEditMode(boolean editMode) {
-        isEditMode = editMode;
-    }
-
-    public String getEditingTransactionId() {
-        return editingTransactionId;
-    }
-
-    public void setEditingTransactionId(String editingTransactionId) {
-        this.editingTransactionId = editingTransactionId;
-    }
-
-    public String getExistingAttachmentUrl() {
-        return existingAttachmentUrl;
-    }
-
-    public void setExistingAttachmentUrl(String existingAttachmentUrl) {
-        this.existingAttachmentUrl = existingAttachmentUrl;
-    }
 }

@@ -35,11 +35,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+@SuppressWarnings("ALL")
 public class HomeFragment extends Fragment {
 
     private TextView tvAccountBalance, tvIncome, tvExpense;
     private LineChart spendFrequencyChart;
-    private RecyclerView rvRecentTransactions;
     private TransactionAdapter adapter;
 
     private final List<Transaction> recentTransactions = new ArrayList<>();
@@ -67,7 +67,7 @@ public class HomeFragment extends Fragment {
         tvIncome = view.findViewById(R.id.tvIncome);
         tvExpense = view.findViewById(R.id.tvExpense);
         spendFrequencyChart = view.findViewById(R.id.spendFrequencyChart);
-        rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
+        RecyclerView rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
 
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentTransactions.setNestedScrollingEnabled(false);

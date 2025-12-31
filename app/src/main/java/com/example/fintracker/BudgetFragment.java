@@ -59,6 +59,7 @@ public class BudgetFragment extends Fragment {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadBudgets() {
+        assert mAuth.getCurrentUser() != null;
         String userId = mAuth.getCurrentUser().getUid();
 
         db.collection("budgets")

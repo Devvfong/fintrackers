@@ -127,7 +127,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/add_circle_24px"
         android:contentDescription="@string/add_transaction"
         app:backgroundTint="@color/purple_primary"
         app:tint="@android:color/white" />
