@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,21 +21,22 @@ import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
-    public interface OnTransactionClickListener {
-        void onTransactionClick(Transaction transaction);
+    public interface Listener {
+        void onEditClick(@NonNull Transaction transaction);
+        void onRowClick(@NonNull Transaction transaction);
     }
 
-    private final Context context;
-    private final List<Transaction> transactionList;
-    private final OnTransactionClickListener listener;
+    @NonNull private final Context context;
+    @NonNull private final List<Transaction> transactionList;
+    private final Listener listener;
 
-    // Default constructor (no click)
-    public TransactionAdapter(Context context, List<Transaction> transactionList) {
+    // ✅ BACKWARD COMPATIBLE for HomeFragment
+    public TransactionAdapter(@NonNull Context context, @NonNull List<Transaction> transactionList) {
         this(context, transactionList, null);
     }
 
-    // Constructor with click listener (for edit)
-    public TransactionAdapter(Context context, List<Transaction> transactionList, OnTransactionClickListener listener) {
+    // ✅ MAIN constructor for TransactionFragment
+    public TransactionAdapter(@NonNull Context context, @NonNull List<Transaction> transactionList, Listener listener) {
         this.context = context;
         this.transactionList = transactionList;
         this.listener = listener;
@@ -46,7 +48,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         notifyItemRemoved(position);
     }
 
-    public void updateTransactions(List<Transaction> newTransactions) {
+    public void updateTransactions(@NonNull List<Transaction> newTransactions) {
         transactionList.clear();
         transactionList.addAll(newTransactions);
         notifyDataSetChanged();
@@ -74,57 +76,45 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
-        String amountText;
         if ("Income".equals(transaction.getType())) {
-            amountText = "+ " + formatter.format(transaction.getAmount());
+            holder.tvAmount.setText("+ " + formatter.format(transaction.getAmount()));
             holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.green_income));
         } else {
-            amountText = "- " + formatter.format(transaction.getAmount());
+            holder.tvAmount.setText("- " + formatter.format(transaction.getAmount()));
             holder.tvAmount.setTextColor(ContextCompat.getColor(context, R.color.red_expense));
         }
-        holder.tvAmount.setText(amountText);
 
         SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         holder.tvTime.setText(timeFormat.format(new Date(transaction.getTimestamp())));
 
         setCategoryIcon(holder, transaction.getCategory());
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onTransactionClick(transaction);
-        });
+        // ✅ EDIT ICON CLICK
+        if (listener != null) {
+            holder.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
+            holder.itemView.setOnClickListener(v -> listener.onRowClick(transaction));
+        }
     }
 
-    private void setCategoryIcon(TransactionViewHolder holder, String category) {
-        // Icons
-        int iconRes;
+    private void setCategoryIcon(@NonNull TransactionViewHolder holder, String category) {
+        int iconRes = android.R.drawable.ic_menu_more;
+        int bgColorRes = R.color.border_light;
+
         if ("Shopping".equals(category)) {
             iconRes = android.R.drawable.ic_menu_gallery;
-        } else if ("Subscription".equals(category)) {
-            iconRes = android.R.drawable.ic_dialog_info;
-        } else if ("Food".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_info_details;
-        } else if ("Salary".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_agenda;
-        } else if ("Transport".equals(category)) {
-            iconRes = android.R.drawable.ic_menu_directions;
-        } else {
-            iconRes = android.R.drawable.ic_menu_more;
-        }
-
-        // Background colors
-        int bgColorRes;
-        if ("Shopping".equals(category)) {
             bgColorRes = R.color.category_shopping;
         } else if ("Subscription".equals(category)) {
+            iconRes = android.R.drawable.ic_dialog_info;
             bgColorRes = R.color.category_subscription;
         } else if ("Food".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_info_details;
             bgColorRes = R.color.category_food;
         } else if ("Salary".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_agenda;
             bgColorRes = R.color.category_salary;
         } else if ("Transport".equals(category)) {
+            iconRes = android.R.drawable.ic_menu_directions;
             bgColorRes = R.color.category_transport;
-        } else {
-            bgColorRes = R.color.border_light;
         }
 
         holder.ivCategoryIcon.setImageResource(iconRes);
@@ -141,8 +131,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         CardView cvCategoryIcon;
         ImageView ivCategoryIcon;
         TextView tvCategory, tvDescription, tvAmount, tvTime;
+        ImageButton btnEdit; // ✅ MISSING BEFORE
 
-        public TransactionViewHolder(@NonNull View itemView) {
+        TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
             cvCategoryIcon = itemView.findViewById(R.id.cvCategoryIcon);
             ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
@@ -150,6 +141,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvAmount = itemView.findViewById(R.id.tvAmount);
             tvTime = itemView.findViewById(R.id.tvTime);
+            btnEdit = itemView.findViewById(R.id.btnEdit); // ✅ FIXED
         }
     }
 }

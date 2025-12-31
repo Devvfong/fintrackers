@@ -394,33 +394,58 @@ public class AddTransactionActivity extends AppCompatActivity {
                 });
     }
 
+    private void performSave(Map<String, Object> transaction) {
+        if (isEditMode && editingTransactionId != null && !editingTransactionId.trim().isEmpty()) {
+            db.collection("transactions")
+                    .document(editingTransactionId)
+                    .update(transaction)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, R.string.msg_update_success, Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, getString(R.string.msg_update_error) + " " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        setContinueStateIdle();
+                    });
+        } else {
+            db.collection("transactions")
+                    .add(transaction)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(this, R.string.msg_add_success, Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, getString(R.string.msg_add_error) + " " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        setContinueStateIdle();
+                    });
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private void saveTransaction() {
         if (isUploading) {
-            Toast.makeText(this, "Please wait for upload to finish.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_wait_upload, Toast.LENGTH_SHORT).show();
             return;
         }
 
         String amountStr = etAmount.getText().toString().trim()
-                .replace("$", "")
-                .replace(",", "");
-
+                .replace("$", "").replace(",", "");
         String category = actvCategory.getText().toString().trim();
         String wallet = actvWallet.getText().toString().trim();
         String description = Objects.requireNonNull(etDescription.getText()).toString().trim();
 
         if (TextUtils.isEmpty(amountStr) || amountStr.equals("0")) {
-            Toast.makeText(this, "⚠️ Please enter amount", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_enter_amount, Toast.LENGTH_SHORT).show();
             etAmount.requestFocus();
             return;
         }
         if (TextUtils.isEmpty(category)) {
-            Toast.makeText(this, "⚠️ Please select category", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_select_category, Toast.LENGTH_SHORT).show();
             actvCategory.requestFocus();
             return;
         }
         if (TextUtils.isEmpty(wallet)) {
-            Toast.makeText(this, "⚠️ Please select wallet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_select_wallet, Toast.LENGTH_SHORT).show();
             actvWallet.requestFocus();
             return;
         }
@@ -429,12 +454,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         try {
             amount = Double.parseDouble(amountStr);
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "⚠️ Invalid amount", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_invalid_amount, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (mAuth.getCurrentUser() == null) {
-            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.msg_not_logged_in, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -450,40 +475,25 @@ public class AddTransactionActivity extends AppCompatActivity {
         transaction.put("type", type);
         transaction.put("timestamp", selectedTimestamp);
         transaction.put("isRepeated", switchRepeat.isChecked());
-
         if (attachmentUrl != null && !attachmentUrl.trim().isEmpty()) {
             transaction.put("attachmentUrl", attachmentUrl);
         }
 
         btnContinue.setEnabled(false);
-        btnContinue.setText("Saving...");
+        btnContinue.setText(R.string.saving);
 
-        if (isEditMode && editingTransactionId != null && !editingTransactionId.trim().isEmpty()) {
-            db.collection("transactions")
-                    .document(editingTransactionId)
-                    .update(transaction)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Transaction updated successfully!", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Update error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        setContinueStateIdle();
-                    });
+        if (isEditMode) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.save_changes_title)
+                    .setMessage(R.string.save_changes_message)
+                    .setPositiveButton(R.string.save, (dialog, which) -> performSave(transaction))
+                    .setNegativeButton(R.string.cancel, (dialog, which) -> setContinueStateIdle())
+                    .show();
         } else {
-            db.collection("transactions")
-                    .add(transaction)
-                    .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(this, "Transaction added successfully!", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        setContinueStateIdle();
-                    });
+            performSave(transaction);
         }
-
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,

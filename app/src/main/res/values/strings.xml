@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="msg_camera_denied">Camera access denied</string>
+    <string name="msg_gallery_denied">Gallery access denied</string>
+    <string name="msg_storage_unavailable">Storage unavailable</string>
+
+
     <string name="app_name">FinTrack</string>
     <string name="date">Date</string>
     <string name="remove">Remove</string>
@@ -10,6 +15,31 @@
     <string name="start_tracking_your_expenses">Start tracking your expenses</string>
     <string name="add_first_transaction">Tap + to add your first transaction</string>
     <string name="add_transaction">Add Transaction</string>
+    <!--edit transaction-->
+<!--    <string name="edit">Edit</string>-->
+    <string name="update">Update</string>
+    <string name="saving">Saving…</string>
+    <string name="save_changes_title">Save changes?</string>
+    <string name="save_changes_message">Are you sure you want to save these changes?</string>
+<!--    <string name="save">Save</string>-->
+<!--    <string name="cancel">Cancel</string>-->
+
+    <string name="msg_attachment_removed">Attachment removed</string>
+    <string name="msg_wait_upload">Please wait for upload to finish.</string>
+    <string name="msg_enter_amount">Please enter amount</string>
+    <string name="msg_select_category">Please select category</string>
+    <string name="msg_select_wallet">Please select wallet</string>
+    <string name="msg_invalid_amount">Invalid amount</string>
+    <string name="msg_not_logged_in">Not logged in</string>
+    <string name="msg_update_success">Transaction updated successfully!</string>
+    <string name="msg_add_success">Transaction added successfully!</string>
+    <string name="msg_update_error">Update error:</string>
+    <string name="msg_add_error">Error:</string>
+
+    <string name="attachment_dialog_title">Add attachment</string>
+    <string name="attachment_take_photo">Take photo</string>
+    <string name="attachment_choose_gallery">Choose from gallery</string>
+    <string name="attachment_remove">Remove attachment</string>
 
     <!-- Login & Auth -->
     <string name="login">Login</string>

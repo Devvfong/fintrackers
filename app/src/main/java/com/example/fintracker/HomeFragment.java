@@ -39,17 +39,14 @@ public class HomeFragment extends Fragment {
 
     private TextView tvAccountBalance, tvIncome, tvExpense;
     private LineChart spendFrequencyChart;
-
     private RecyclerView rvRecentTransactions;
     private TransactionAdapter adapter;
 
-    // Important: adapter uses THIS list. Don’t replace it, just update it.
     private final List<Transaction> recentTransactions = new ArrayList<>();
     private final List<Transaction> allTransactions = new ArrayList<>();
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-
     private double totalIncome = 0;
     private double totalExpense = 0;
 
@@ -70,16 +67,16 @@ public class HomeFragment extends Fragment {
         tvIncome = view.findViewById(R.id.tvIncome);
         tvExpense = view.findViewById(R.id.tvExpense);
         spendFrequencyChart = view.findViewById(R.id.spendFrequencyChart);
-
         rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
+
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentTransactions.setNestedScrollingEnabled(false);
 
+        // ✅ FIXED: Uses 2-param constructor (backward compatible)
         adapter = new TransactionAdapter(getContext(), recentTransactions);
         rvRecentTransactions.setAdapter(adapter);
 
         setupChart();
-
         if (mAuth.getCurrentUser() != null) {
             loadTransactions();
         }
@@ -88,9 +85,10 @@ public class HomeFragment extends Fragment {
     @SuppressLint("NotifyDataSetChanged")
     private void loadTransactions() {
         if (mAuth.getCurrentUser() == null) return;
+
         String userId = mAuth.getCurrentUser().getUid();
 
-        // 1) Chart data (last 30 days)
+        // 1) Chart data (last 30 days expenses)
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -30);
         long thirtyDaysAgo = calendar.getTimeInMillis();
@@ -121,18 +119,7 @@ public class HomeFragment extends Fragment {
                 .addSnapshotListener((value, error) -> {
                     if (error != null) return;
 
-                    // Replace the recent transactions part with:
                     recentTransactions.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document : value) {
-                            Transaction t = document.toObject(Transaction.class);
-                            t.setId(document.getId());
-                            recentTransactions.add(t);
-                            // ... totals
-                        }
-                    }
-                    adapter.updateTransactions(recentTransactions);  // 🔥 USE THIS
-
                     totalIncome = 0;
                     totalExpense = 0;
 
@@ -142,16 +129,17 @@ public class HomeFragment extends Fragment {
                             t.setId(document.getId());
                             recentTransactions.add(t);
 
-                            if ("Income".equals(t.getType())) totalIncome += t.getAmount();
-                            else totalExpense += t.getAmount();
+                            if ("Income".equals(t.getType())) {
+                                totalIncome += t.getAmount();
+                            } else {
+                                totalExpense += t.getAmount();
+                            }
                         }
                     }
 
-                    // Show oldest-to-newest inside the "Recent Transaction" list (optional)
-                    recentTransactions.sort(Comparator.comparingLong(Transaction::getTimestamp));
-
+                    // ✅ FIXED: Uses updateTransactions() method
+                    adapter.updateTransactions(recentTransactions);
                     updateBalanceUI();
-                    adapter.notifyDataSetChanged(); // refresh list [web:0]
                 });
     }
 
@@ -187,10 +175,12 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // Only expense transactions
+        // Only expense transactions for chart
         List<Transaction> expenseTransactions = new ArrayList<>();
         for (Transaction t : allTransactions) {
-            if ("Expense".equals(t.getType())) expenseTransactions.add(t);
+            if ("Expense".equals(t.getType())) {
+                expenseTransactions.add(t);
+            }
         }
 
         if (expenseTransactions.isEmpty()) {
@@ -199,7 +189,6 @@ public class HomeFragment extends Fragment {
         }
 
         expenseTransactions.sort(Comparator.comparingLong(Transaction::getTimestamp));
-
         int startIndex = Math.max(0, expenseTransactions.size() - 5);
         List<Transaction> lastFive = expenseTransactions.subList(startIndex, expenseTransactions.size());
 
@@ -238,6 +227,7 @@ public class HomeFragment extends Fragment {
     private void updateBalanceUI() {
         double balance = totalIncome - totalExpense;
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
+
         tvAccountBalance.setText(formatter.format(balance));
         tvIncome.setText(formatter.format(totalIncome));
         tvExpense.setText(formatter.format(totalExpense));
@@ -246,6 +236,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mAuth.getCurrentUser() != null) loadTransactions();
+        if (mAuth.getCurrentUser() != null) {
+            loadTransactions();
+        }
     }
 }
