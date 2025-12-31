@@ -3,6 +3,7 @@ package com.example.fintracker;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,11 +75,18 @@ public class HomeFragment extends Fragment {
 
         // ✅ FIXED: Uses 2-param constructor (backward compatible)
         adapter = new TransactionAdapter(
-        requireContext(),
-        recentTransactions,
-        null   // no click listener on home
-);
+                requireContext(),
+                recentTransactions,
+                new TransactionAdapter.Listener() {
+                    @Override
+                    public void onEditClick(@NonNull Transaction transaction) {}
+                    @Override
+                    public void onRowClick(@NonNull Transaction transaction) {}
+                }
+        );
         rvRecentTransactions.setAdapter(adapter);
+
+
 
         setupChart();
         if (mAuth.getCurrentUser() != null) {
@@ -118,8 +126,6 @@ public class HomeFragment extends Fragment {
         // 2) Recent list (TOP 5 newest) + totals
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(5)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) return;
 
@@ -143,8 +149,12 @@ public class HomeFragment extends Fragment {
 
                     // ✅ FIXED: Uses updateTransactions() method
                     adapter.updateTransactions(recentTransactions);
+                    Log.d("HomeFragment", "Transactions loaded: " + recentTransactions.size());
+                    Log.d("HomeFragment", "Adapter item count: " + adapter.getItemCount());
+
                     updateBalanceUI();
                 });
+
     }
 
     private void setupChart() {

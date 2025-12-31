@@ -1,10 +1,11 @@
 package com.example.fintracker;
 
 public class Transaction {
+
     private String id, userId, type, category, wallet, description, attachmentUrl;
     private double amount;
     private long timestamp;
-    private boolean isRepeated = false;  // ✅ ADD THIS LINE
+    private boolean isRepeated = false;
 
     public Transaction() {}
 
@@ -36,7 +37,8 @@ public class Transaction {
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-    // ✅ ADD THESE 2 METHODS:
+    // ✅ FIXED: Proper Firestore boolean naming convention
     public boolean isRepeated() { return isRepeated; }
-    public void setRepeated(boolean repeated) { isRepeated = repeated; }
+    public void setIsRepeated(boolean isRepeated) { this.isRepeated = isRepeated; }  // ← CHANGED FROM setRepeated
+
 }
