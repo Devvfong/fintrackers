@@ -42,14 +42,15 @@
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:drawableEnd="@drawable/ic_arrow_down"
-                android:drawableTint="@color/purple_primary"
-                android:drawablePadding="8dp"/>
+                android:drawablePadding="8dp"
+                app:drawableEndCompat="@drawable/ic_arrow_down"
+                app:drawableTint="@color/purple_primary" />
 
             <ImageView
                 android:id="@+id/ivNotification"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:contentDescription="@string/todo"
                 android:src="@drawable/ic_notification"
                 android:background="@drawable/circle_background"
                 android:padding="8dp"
@@ -70,7 +71,7 @@
             android:id="@+id/tvAccountBalance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="-$4,197.00"
+            android:text="@string/_4_197_00"
             android:textSize="40sp"
             android:textColor="@color/red_expense"
             android:textStyle="bold"
@@ -113,7 +114,7 @@
                         android:id="@+id/tvIncome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$0.00"
+                        android:text="@string/_0_00"
                         android:textSize="24sp"
                         android:textColor="@android:color/white"
                         android:textStyle="bold"
@@ -150,7 +151,7 @@
                         android:id="@+id/tvExpense"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$4,197.00"
+                        android:text="@string/_4_197_00"
                         android:textSize="24sp"
                         android:textColor="@android:color/white"
                         android:textStyle="bold"
@@ -215,11 +216,12 @@
                 android:padding="12dp"/>
         </LinearLayout>
 
-        <!-- Recent Transactions -->
+        <!-- Recent Transactions RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRecentTransactions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="450dp"
             android:nestedScrollingEnabled="false"
             tools:listitem="@layout/item_transaction" />
 

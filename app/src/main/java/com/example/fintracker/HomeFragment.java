@@ -24,24 +24,24 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-@SuppressWarnings("ALL")
 public class HomeFragment extends Fragment {
 
     private TextView tvAccountBalance, tvIncome, tvExpense;
     private LineChart spendFrequencyChart;
     private TransactionAdapter adapter;
+    private RecyclerView rvRecentTransactions;
 
     private final List<Transaction> recentTransactions = new ArrayList<>();
     private final List<Transaction> allTransactions = new ArrayList<>();
@@ -52,8 +52,7 @@ public class HomeFragment extends Fragment {
     private double totalExpense = 0;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -68,25 +67,26 @@ public class HomeFragment extends Fragment {
         tvIncome = view.findViewById(R.id.tvIncome);
         tvExpense = view.findViewById(R.id.tvExpense);
         spendFrequencyChart = view.findViewById(R.id.spendFrequencyChart);
-        RecyclerView rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
+        rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
 
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentTransactions.setNestedScrollingEnabled(false);
 
-        // ✅ FIXED: Uses 2-param constructor (backward compatible)
         adapter = new TransactionAdapter(
                 requireContext(),
                 recentTransactions,
                 new TransactionAdapter.Listener() {
                     @Override
-                    public void onEditClick(@NonNull Transaction transaction) {}
+                    public void onEditClick(@NonNull Transaction transaction) {
+                        // TODO: Implement edit
+                    }
                     @Override
-                    public void onRowClick(@NonNull Transaction transaction) {}
+                    public void onRowClick(@NonNull Transaction transaction) {
+                        // TODO: Open detail
+                    }
                 }
         );
         rvRecentTransactions.setAdapter(adapter);
-
-
 
         setupChart();
         if (mAuth.getCurrentUser() != null) {
@@ -99,37 +99,18 @@ public class HomeFragment extends Fragment {
         if (mAuth.getCurrentUser() == null) return;
 
         String userId = mAuth.getCurrentUser().getUid();
+        Log.d("HomeFragment", "Loading transactions for user: " + userId);
 
-        // 1) Chart data (last 30 days expenses)
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, -30);
-        long thirtyDaysAgo = calendar.getTimeInMillis();
-
+        // Load ALL transactions
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
-                .whereGreaterThan("timestamp", thirtyDaysAgo)
-                .orderBy("timestamp", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
-                    if (error != null) return;
-
-                    allTransactions.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document : value) {
-                            Transaction t = document.toObject(Transaction.class);
-                            t.setId(document.getId());
-                            allTransactions.add(t);
-                        }
+                    if (error != null) {
+                        Log.e("HomeFragment", "Error loading transactions", error);
+                        return;
                     }
-                    updateChart();
-                });
 
-        // 2) Recent list (TOP 5 newest) + totals
-        db.collection("transactions")
-                .whereEqualTo("userId", userId)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) return;
-
-                    recentTransactions.clear();
+                    List<Transaction> allTrans = new ArrayList<>();
                     totalIncome = 0;
                     totalExpense = 0;
 
@@ -137,8 +118,9 @@ public class HomeFragment extends Fragment {
                         for (QueryDocumentSnapshot document : value) {
                             Transaction t = document.toObject(Transaction.class);
                             t.setId(document.getId());
-                            recentTransactions.add(t);
+                            allTrans.add(t);
 
+                            // Calculate totals
                             if ("Income".equals(t.getType())) {
                                 totalIncome += t.getAmount();
                             } else {
@@ -147,14 +129,41 @@ public class HomeFragment extends Fragment {
                         }
                     }
 
-                    // ✅ FIXED: Uses updateTransactions() method
-                    adapter.updateTransactions(recentTransactions);
-                    Log.d("HomeFragment", "Transactions loaded: " + recentTransactions.size());
-                    Log.d("HomeFragment", "Adapter item count: " + adapter.getItemCount());
+                    // Sort by newest first
+                    Collections.sort(allTrans, new Comparator<Transaction>() {
+                        @Override
+                        public int compare(Transaction t1, Transaction t2) {
+                            return Long.compare(t2.getTimestamp(), t1.getTimestamp());
+                        }
+                    });
 
+                    // Get top 5 for recent transactions list
+                    recentTransactions.clear();
+                    int limit = Math.min(5, allTrans.size());
+                    for (int i = 0; i < limit; i++) {
+                        recentTransactions.add(allTrans.get(i));
+                    }
+
+                    // Get last 30 days for chart
+                    allTransactions.clear();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.DAY_OF_MONTH, -30);
+                    long thirtyDaysAgo = calendar.getTimeInMillis();
+
+                    for (Transaction t : allTrans) {
+                        if (t.getTimestamp() > thirtyDaysAgo) {
+                            allTransactions.add(t);
+                        }
+                    }
+
+                    // Update UI
+                    adapter.notifyDataSetChanged();
                     updateBalanceUI();
-                });
+                    updateChart();
 
+                    Log.d("HomeFragment", "Loaded " + recentTransactions.size() + " recent transactions");
+                    Log.d("HomeFragment", "Adapter count: " + adapter.getItemCount());
+                });
     }
 
     private void setupChart() {
@@ -189,7 +198,7 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // Only expense transactions for chart
+        // Only expense transactions
         List<Transaction> expenseTransactions = new ArrayList<>();
         for (Transaction t : allTransactions) {
             if ("Expense".equals(t.getType())) {
@@ -202,7 +211,13 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        expenseTransactions.sort(Comparator.comparingLong(Transaction::getTimestamp));
+        Collections.sort(expenseTransactions, new Comparator<Transaction>() {
+            @Override
+            public int compare(Transaction t1, Transaction t2) {
+                return Long.compare(t1.getTimestamp(), t2.getTimestamp());
+            }
+        });
+
         int startIndex = Math.max(0, expenseTransactions.size() - 5);
         List<Transaction> lastFive = expenseTransactions.subList(startIndex, expenseTransactions.size());
 
