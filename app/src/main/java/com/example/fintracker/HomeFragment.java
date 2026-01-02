@@ -72,19 +72,21 @@ public class HomeFragment extends Fragment {
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentTransactions.setNestedScrollingEnabled(false);
 
+        // Pass false to hide edit button
         adapter = new TransactionAdapter(
                 requireContext(),
                 recentTransactions,
                 new TransactionAdapter.Listener() {
                     @Override
                     public void onEditClick(@NonNull Transaction transaction) {
-                        // TODO: Implement edit
+                        // Not used on home screen
                     }
                     @Override
                     public void onRowClick(@NonNull Transaction transaction) {
                         // TODO: Open detail
                     }
-                }
+                },
+                false  // Hide edit button
         );
         rvRecentTransactions.setAdapter(adapter);
 

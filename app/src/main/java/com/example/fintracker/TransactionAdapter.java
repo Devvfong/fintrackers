@@ -29,13 +29,24 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @NonNull private final Context context;
     @NonNull private final List<Transaction> transactionList;
     @NonNull private final Listener listener;
+    private final boolean showEditButton;
 
+    // Constructor with edit button control
     public TransactionAdapter(@NonNull Context context,
                               @NonNull List<Transaction> transactionList,
-                              @NonNull Listener listener) {
+                              @NonNull Listener listener,
+                              boolean showEditButton) {
         this.context = context;
         this.transactionList = transactionList;
         this.listener = listener;
+        this.showEditButton = showEditButton;
+    }
+
+    // Default constructor (shows edit button)
+    public TransactionAdapter(@NonNull Context context,
+                              @NonNull List<Transaction> transactionList,
+                              @NonNull Listener listener) {
+        this(context, transactionList, listener, true);
     }
 
     public void updateTransactions(@NonNull List<Transaction> newTransactions) {
@@ -79,8 +90,15 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         setCategoryIcon(holder, transaction.getCategory());
 
+        // Show/hide edit button
+        if (showEditButton) {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
+        } else {
+            holder.btnEdit.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener(v -> listener.onRowClick(transaction));
-        holder.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
     }
 
     @Override
