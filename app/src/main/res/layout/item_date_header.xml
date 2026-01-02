@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="20dp"
+    android:paddingBottom="12dp"
+    android:paddingHorizontal="16dp">
+
+    <TextView
+        android:id="@+id/tvDateHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="01 January 2026"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="#91919F"
+        android:letterSpacing="0.08"
+        android:paddingBottom="8dp"
+        android:textAllCaps="true" />
+
+    <!-- Thin divider line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F1F1FA" />
+
+</LinearLayout>

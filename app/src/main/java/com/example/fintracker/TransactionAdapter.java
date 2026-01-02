@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,19 +8,24 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
+@SuppressWarnings("ALL")
+public class TransactionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_DATE_HEADER = 0;
+    private static final int TYPE_TRANSACTION = 1;
 
     public interface Listener {
         void onEditClick(@NonNull Transaction transaction);
@@ -27,6 +33,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     }
 
     @NonNull private final Context context;
+    @NonNull private final List<TransactionListItem> itemList = new ArrayList<>();
     @NonNull private final List<Transaction> transactionList;
     @NonNull private final Listener listener;
     private final boolean showEditButton;
@@ -40,6 +47,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         this.transactionList = transactionList;
         this.listener = listener;
         this.showEditButton = showEditButton;
+        groupByDate(transactionList);
     }
 
     // Default constructor (shows edit button)
@@ -49,67 +57,102 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         this(context, transactionList, listener, true);
     }
 
-    public void updateTransactions(@NonNull List<Transaction> newTransactions) {
-        transactionList.clear();
-        transactionList.addAll(newTransactions);
+    public void updateTransactions(@NonNull List<Transaction> transactions) {
+        itemList.clear();
+        groupByDate(transactions);
         notifyDataSetChanged();
+    }
+
+    private void groupByDate(@NonNull List<Transaction> transactions) {
+        Map<String, List<Transaction>> grouped = new LinkedHashMap<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
+        for (Transaction t : transactions) {
+            String dateKey = dateFormat.format(new Date(t.getTimestamp()));
+            grouped.computeIfAbsent(dateKey, k -> new ArrayList<>()).add(t);
+        }
+
+        for (Map.Entry<String, List<Transaction>> entry : grouped.entrySet()) {
+            itemList.add(new TransactionListItem(entry.getKey()));
+            for (Transaction t : entry.getValue()) {
+                itemList.add(new TransactionListItem(t));
+            }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return itemList.get(position).isHeader() ? TYPE_DATE_HEADER : TYPE_TRANSACTION;
     }
 
     @NonNull
     @Override
-    public TransactionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_transaction, parent, false);
-        return new TransactionViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_DATE_HEADER) {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_date_header, parent, false);
+            return new DateHeaderViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_transaction, parent, false);
+            return new TransactionViewHolder(view);
+        }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
-        Transaction transaction = transactionList.get(position);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        TransactionListItem item = itemList.get(position);
 
-        holder.tvCategory.setText(transaction.getCategory());
+        if (holder instanceof DateHeaderViewHolder) {
+            ((DateHeaderViewHolder) holder).tvDateHeader.setText(item.getDateHeader());
+            return;
+        }
 
+        // Your original transaction binding code
+        TransactionViewHolder vh = (TransactionViewHolder) holder;
+        Transaction transaction = item.getTransaction();
+
+        vh.tvCategory.setText(transaction.getCategory());
         String desc = transaction.getDescription();
         if (desc != null && !desc.trim().isEmpty()) {
-            holder.tvDescription.setText(desc);
-            holder.tvDescription.setVisibility(View.VISIBLE);
+            vh.tvDescription.setText(desc);
+            vh.tvDescription.setVisibility(View.VISIBLE);
         } else {
-            holder.tvDescription.setText("");
-            holder.tvDescription.setVisibility(View.GONE);
+            vh.tvDescription.setText("");
+            vh.tvDescription.setVisibility(View.GONE);
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
         boolean isIncome = "Income".equals(transaction.getType());
-        holder.tvAmount.setText((isIncome ? "+ " : "- ") + formatter.format(transaction.getAmount()));
-        holder.tvAmount.setTextColor(ContextCompat.getColor(
+        vh.tvAmount.setText((isIncome ? "+ " : "- ") + formatter.format(transaction.getAmount()));
+        vh.tvAmount.setTextColor(ContextCompat.getColor(
                 context,
                 isIncome ? android.R.color.holo_green_dark : android.R.color.holo_red_dark
         ));
 
         SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        holder.tvTime.setText(timeFormat.format(new Date(transaction.getTimestamp())));
+        vh.tvTime.setText(timeFormat.format(new Date(transaction.getTimestamp())));
 
-        setCategoryIcon(holder, transaction.getCategory());
+        setCategoryIcon(vh, transaction.getCategory());
 
         // Show/hide edit button
         if (showEditButton) {
-            holder.btnEdit.setVisibility(View.VISIBLE);
-            holder.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
+            vh.btnEdit.setVisibility(View.VISIBLE);
+            vh.btnEdit.setOnClickListener(v -> listener.onEditClick(transaction));
         } else {
-            holder.btnEdit.setVisibility(View.GONE);
+            vh.btnEdit.setVisibility(View.GONE);
         }
 
-        holder.itemView.setOnClickListener(v -> listener.onRowClick(transaction));
+        vh.itemView.setOnClickListener(v -> listener.onRowClick(transaction));
     }
 
     @Override
     public int getItemCount() {
-        return transactionList.size();
+        return itemList.size();
     }
 
     private void setCategoryIcon(@NonNull TransactionViewHolder holder, @NonNull String category) {
         int iconRes;
         int bgColor;
-
         switch (category) {
             case "Salary":
                 iconRes = R.drawable.attach_money_24px;
@@ -131,7 +174,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 iconRes = R.drawable.emoji_transportation_24px;
                 bgColor = 0xFF9C27B0;
                 break;
-
             default:
                 iconRes = R.drawable.other_admission_24px;
                 bgColor = 0xFF607D8B;
@@ -143,19 +185,25 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.cvCategoryIcon.setCardBackgroundColor(bgColor);
     }
 
+    static class DateHeaderViewHolder extends RecyclerView.ViewHolder {
+        TextView tvDateHeader;
+        DateHeaderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvDateHeader = itemView.findViewById(R.id.tvDateHeader);
+        }
+    }
+
     static class TransactionViewHolder extends RecyclerView.ViewHolder {
         TextView tvCategory, tvDescription, tvAmount, tvTime;
         CardView cvCategoryIcon;
         ImageView ivCategoryIcon;
         ImageButton btnEdit;
-
         TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvAmount = itemView.findViewById(R.id.tvAmount);
             tvTime = itemView.findViewById(R.id.tvTime);
-
             cvCategoryIcon = itemView.findViewById(R.id.cvCategoryIcon);
             ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
             btnEdit = itemView.findViewById(R.id.btnEdit);

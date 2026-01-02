@@ -159,7 +159,7 @@ public class HomeFragment extends Fragment {
                     }
 
                     // Update UI
-                    adapter.notifyDataSetChanged();
+                    adapter.updateTransactions(recentTransactions);
                     updateBalanceUI();
                     updateChart();
 

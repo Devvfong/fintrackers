@@ -41,7 +41,7 @@ public class TransactionFragment extends Fragment {
     // Filter settings
     private String filterType = "All";
     private String filterCategory = "All";
-    private String sortBy = "Newest";
+    private String sortBy = "Newest First";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -206,7 +206,7 @@ public class TransactionFragment extends Fragment {
             });
         }
 
-        adapter.notifyDataSetChanged();
+        adapter.updateTransactions(transactionList);
         Log.d("Filter", "Final list: " + transactionList.size() + " transactions");
     }
 
