@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,16 +17,19 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings("ALL")
 public class TransactionFragment extends Fragment {
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
@@ -32,6 +37,11 @@ public class TransactionFragment extends Fragment {
     private final List<Transaction> allTransactions = new ArrayList<>();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+
+    // Filter settings
+    private String filterType = "All";
+    private String filterCategory = "All";
+    private String sortBy = "Newest";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,7 +52,6 @@ public class TransactionFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Log.d("TransactionFragment", "🔥 onViewCreated START");
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -51,8 +60,13 @@ public class TransactionFragment extends Fragment {
         recyclerView.setNestedScrollingEnabled(false);
 
         adapter = new TransactionAdapter(requireContext(), transactionList, new TransactionAdapter.Listener() {
-            @Override public void onEditClick(@NonNull Transaction t) { openEdit(t); }
-            @Override public void onRowClick(@NonNull Transaction t) {
+            @Override
+            public void onEditClick(@NonNull Transaction t) {
+                openEdit(t);
+            }
+
+            @Override
+            public void onRowClick(@NonNull Transaction t) {
                 Intent i = new Intent(requireContext(), TransactionDetailActivity.class);
                 i.putExtra("transactionId", t.getId());
                 startActivity(i);
@@ -64,31 +78,154 @@ public class TransactionFragment extends Fragment {
         FloatingActionButton fabAddTransaction = view.findViewById(R.id.fabAddTransaction);
         fabAddTransaction.setOnClickListener(v -> startActivity(new Intent(requireContext(), AddTransactionActivity.class)));
 
+        // Filter button
+        View btnFilter = view.findViewById(R.id.btnFilter);
+        if (btnFilter != null) {
+            btnFilter.setOnClickListener(v -> showFilterDialog());
+        }
+
         attachSwipeDelete();
         loadTransactions();
-        Log.d("TransactionFragment", "🎉 onViewCreated COMPLETE");
+    }
+
+    private void showFilterDialog() {
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_filter, null);
+
+        // Type chips
+        ChipGroup chipGroupType = dialogView.findViewById(R.id.chipGroupType);
+        chipGroupType.setSingleSelection(true);
+
+        // Category chips
+        ChipGroup chipGroupCategory = dialogView.findViewById(R.id.chipGroupCategory);
+        chipGroupCategory.setSingleSelection(true);
+
+        // Sort chips
+        ChipGroup chipGroupSort = dialogView.findViewById(R.id.chipGroupSort);
+        chipGroupSort.setSingleSelection(true);
+
+        // Set current selections
+        setChipChecked(chipGroupType, filterType);
+        setChipChecked(chipGroupCategory, filterCategory);
+        setChipChecked(chipGroupSort, sortBy);
+
+        // Apply button
+        Button btnApply = dialogView.findViewById(R.id.btnApply);
+        btnApply.setOnClickListener(v -> {
+            // Get selected type
+            filterType = getSelectedChipText(chipGroupType, "All");
+            filterCategory = getSelectedChipText(chipGroupCategory, "All");
+            sortBy = getSelectedChipText(chipGroupSort, "Newest First");
+
+            Log.d("Filter", "Type: " + filterType + ", Category: " + filterCategory + ", Sort: " + sortBy);
+
+            applyFilter();
+            Toast.makeText(requireContext(), "Filter applied", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        // Reset button
+        Button btnReset = dialogView.findViewById(R.id.btnReset);
+        btnReset.setOnClickListener(v -> {
+            filterType = "All";
+            filterCategory = "All";
+            sortBy = "Newest First";
+            applyFilter();
+            Toast.makeText(requireContext(), "Filter reset", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.setContentView(dialogView);
+        dialog.show();
+    }
+
+    private void setChipChecked(ChipGroup chipGroup, String value) {
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            Chip chip = (Chip) chipGroup.getChildAt(i);
+            String chipText = chip.getText().toString();
+            if (chipText.equals(value)) {
+                chip.setChecked(true);
+                return;
+            }
+        }
+    }
+
+    private String getSelectedChipText(ChipGroup chipGroup, String defaultValue) {
+        int selectedId = chipGroup.getCheckedChipId();
+        if (selectedId == -1) return defaultValue;
+
+        Chip selectedChip = chipGroup.findViewById(selectedId);
+        return selectedChip != null ? selectedChip.getText().toString() : defaultValue;
+    }
+
+    private void applyFilter() {
+        transactionList.clear();
+
+        Log.d("Filter", "All transactions: " + allTransactions.size());
+
+        // Filter by type and category
+        for (Transaction t : allTransactions) {
+            boolean typeMatch = filterType.equals("All") || filterType.equals(t.getType());
+            boolean categoryMatch = filterCategory.equals("All") || filterCategory.equals(t.getCategory());
+
+            if (typeMatch && categoryMatch) {
+                transactionList.add(t);
+            }
+        }
+
+        Log.d("Filter", "After filter: " + transactionList.size());
+
+        // Sort
+        if (sortBy.equals("Newest First")) {
+            Collections.sort(transactionList, new Comparator<Transaction>() {
+                @Override
+                public int compare(Transaction t1, Transaction t2) {
+                    return Long.compare(t2.getTimestamp(), t1.getTimestamp());
+                }
+            });
+        } else if (sortBy.equals("Oldest First")) {
+            Collections.sort(transactionList, new Comparator<Transaction>() {
+                @Override
+                public int compare(Transaction t1, Transaction t2) {
+                    return Long.compare(t1.getTimestamp(), t2.getTimestamp());
+                }
+            });
+        } else if (sortBy.equals("Highest Amount")) {
+            Collections.sort(transactionList, new Comparator<Transaction>() {
+                @Override
+                public int compare(Transaction t1, Transaction t2) {
+                    return Double.compare(t2.getAmount(), t1.getAmount());
+                }
+            });
+        } else if (sortBy.equals("Lowest Amount")) {
+            Collections.sort(transactionList, new Comparator<Transaction>() {
+                @Override
+                public int compare(Transaction t1, Transaction t2) {
+                    return Double.compare(t1.getAmount(), t2.getAmount());
+                }
+            });
+        }
+
+        adapter.notifyDataSetChanged();
+        Log.d("Filter", "Final list: " + transactionList.size() + " transactions");
     }
 
     private void loadTransactions() {
         String userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "NO_USER";
-        Log.d("TransactionFragment", "🔥 loadTransactions START - user: " + userId);
+        Log.d("TransactionFragment", "Loading transactions for user: " + userId);
 
         if (mAuth.getCurrentUser() == null) {
-            Log.w("TransactionFragment", "❌ NO USER LOGGED IN - skipping");
+            Log.w("TransactionFragment", "No user logged in");
             return;
         }
 
         db.collection("transactions")
                 .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null) {
-                        Log.e("TransactionFragment", "❌ FIRESTORE ERROR: " + error.getMessage(), error);
+                        Log.e("TransactionFragment", "Firestore error: " + error.getMessage(), error);
                         return;
                     }
-
-                    int docCount = snapshots != null ? snapshots.size() : 0;
-                    Log.d("TransactionFragment", "📊 QUERY RESULT: " + docCount + " documents");
 
                     List<Transaction> newList = new ArrayList<>();
                     if (snapshots != null) {
@@ -97,41 +234,41 @@ public class TransactionFragment extends Fragment {
                                 Transaction t = doc.toObject(Transaction.class);
                                 t.setId(doc.getId());
                                 newList.add(t);
-                                Log.d("TransactionFragment", "✅ LOADED: " + t.getType() + " $" + t.getAmount());
+                                Log.d("TransactionFragment", "Loaded: " + t.getType() + " - " + t.getCategory());
                             } catch (Exception e) {
-                                Log.e("TransactionFragment", "❌ PARSE ERROR doc: " + doc.getId(), e);
+                                Log.e("TransactionFragment", "Parse error: " + doc.getId(), e);
                             }
                         }
                     }
 
                     allTransactions.clear();
                     allTransactions.addAll(newList);
-                    transactionList.clear();
-                    transactionList.addAll(newList);
-                    adapter.updateTransactions(newList);
-                    Log.d("TransactionFragment", "🎉 ADAPTER UPDATED: " + newList.size() + " transactions");
+                    applyFilter();
                 });
     }
 
     private void attachSwipeDelete() {
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            @Override public boolean onMove(@NonNull RecyclerView r, @NonNull RecyclerView.ViewHolder v, @NonNull RecyclerView.ViewHolder t) { return false; }
-            @Override public void onSwiped(@NonNull RecyclerView.ViewHolder v, int d) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView r, @NonNull RecyclerView.ViewHolder v, @NonNull RecyclerView.ViewHolder t) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder v, int d) {
                 int pos = v.getAdapterPosition();
                 if (pos < 0 || pos >= transactionList.size()) return;
 
                 Transaction t = transactionList.get(pos);
                 new AlertDialog.Builder(requireContext())
-                        .setTitle("Delete?")
-                        .setMessage("Delete " + t.getCategory() + "?")
-                        .setPositiveButton("Yes", (dd, ww) -> {
+                        .setTitle("Delete Transaction?")
+                        .setMessage("Delete " + t.getCategory() + " - $" + t.getAmount() + "?")
+                        .setPositiveButton("Delete", (dd, ww) -> {
                             if (t.getId() != null) {
                                 db.collection("transactions").document(t.getId()).delete();
                             }
-                            transactionList.remove(pos);
-                            adapter.notifyItemRemoved(pos);
                         })
-                        .setNegativeButton("No", (dd, ww) -> adapter.notifyItemChanged(pos))
+                        .setNegativeButton("Cancel", (dd, ww) -> adapter.notifyItemChanged(pos))
                         .show();
             }
         }).attachToRecyclerView(recyclerView);
