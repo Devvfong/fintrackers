@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="bg_screen">#F5F5F5</color>
+    <color name="bg_card">#E0E0E0</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <color name="border_color">#E0E0E0</color>
+<!--    <color name="purple_light">#EEE5FF</color>-->
+<!--    <color name="border_light">#E3E5E5</color>-->
     <!-- Primary Colors -->
     <color name="primary">#7F3DFF</color>
     <color name="purple_primary">#7F3DFF</color>
@@ -13,8 +21,8 @@
     <color name="background_grey">#F1F1FA</color>
 
     <!-- Text Colors -->
-    <color name="text_primary">#212325</color>
-    <color name="text_secondary">#91919F</color>
+<!--    <color name="text_primary">#212325</color>-->
+<!--    <color name="text_secondary">#91919F</color>-->
     <color name="text_hint">#C6C6C6</color>
     <color name="text_white">#FFFFFF</color>
     <color name="text_light">#FFFFFF</color>

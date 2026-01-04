@@ -1,5 +1,6 @@
 package com.example.fintracker;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("ALL")
 public class TransactionFragment extends Fragment {
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
@@ -90,7 +92,7 @@ public class TransactionFragment extends Fragment {
 
     private void showFilterDialog() {
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_filter, null);
+        @SuppressLint("InflateParams") View dialogView = getLayoutInflater().inflate(R.layout.dialog_filter, null);
 
         // Type chips
         ChipGroup chipGroupType = dialogView.findViewById(R.id.chipGroupType);
@@ -176,34 +178,19 @@ public class TransactionFragment extends Fragment {
         Log.d("Filter", "After filter: " + transactionList.size());
 
         // Sort
-        if (sortBy.equals("Newest First")) {
-            Collections.sort(transactionList, new Comparator<Transaction>() {
-                @Override
-                public int compare(Transaction t1, Transaction t2) {
-                    return Long.compare(t2.getTimestamp(), t1.getTimestamp());
-                }
-            });
-        } else if (sortBy.equals("Oldest First")) {
-            Collections.sort(transactionList, new Comparator<Transaction>() {
-                @Override
-                public int compare(Transaction t1, Transaction t2) {
-                    return Long.compare(t1.getTimestamp(), t2.getTimestamp());
-                }
-            });
-        } else if (sortBy.equals("Highest Amount")) {
-            Collections.sort(transactionList, new Comparator<Transaction>() {
-                @Override
-                public int compare(Transaction t1, Transaction t2) {
-                    return Double.compare(t2.getAmount(), t1.getAmount());
-                }
-            });
-        } else if (sortBy.equals("Lowest Amount")) {
-            Collections.sort(transactionList, new Comparator<Transaction>() {
-                @Override
-                public int compare(Transaction t1, Transaction t2) {
-                    return Double.compare(t1.getAmount(), t2.getAmount());
-                }
-            });
+        switch (sortBy) {
+            case "Newest First":
+                transactionList.sort((t1, t2) -> Long.compare(t2.getTimestamp(), t1.getTimestamp()));
+                break;
+            case "Oldest First":
+                transactionList.sort((t1, t2) -> Long.compare(t1.getTimestamp(), t2.getTimestamp()));
+                break;
+            case "Highest Amount":
+                Collections.sort(transactionList, (t1, t2) -> Double.compare(t2.getAmount(), t1.getAmount()));
+                break;
+            case "Lowest Amount":
+                transactionList.sort(Comparator.comparingDouble(Transaction::getAmount));
+                break;
         }
 
         adapter.updateTransactions(transactionList);

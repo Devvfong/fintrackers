@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create Budget"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Category"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerCategory"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/rounded_input"
+        android:padding="12dp"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Budget Limit"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <EditText
+            android:id="@+id/etBudgetLimit"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_input"
+            android:padding="12dp"
+            android:hint="0.00"
+            android:inputType="numberDecimal"
+            android:layout_marginEnd="8dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerCurrency"
+            android:layout_width="100dp"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_input"
+            android:padding="12dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp">
+
+        <Button
+            android:id="@+id/btnCancelBudget"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textColor="@color/text_secondary"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnSaveBudget"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Create"
+            android:textColor="@color/white"
+            android:background="@drawable/rounded_button"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+</LinearLayout>

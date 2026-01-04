@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:background="@color/purple_primary">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Back"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Create Budget"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:layout_marginEnd="40dp" />
+        </LinearLayout>
+
+        <!-- Form Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Amount Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Amount"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <EditText
+                android:id="@+id/etAmount"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_input"
+                android:padding="16dp"
+                android:hint="0.00"
+                android:inputType="numberDecimal"
+                android:textSize="18sp" />
+
+            <!-- Currency Selector -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Currency (USD or KHR only)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="24dp" />
+
+            <Spinner
+                android:id="@+id/spinnerCurrency"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_input"
+                android:padding="16dp" />
+
+            <!-- Month Selector (This Month or Last Month ONLY) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Month (This Month or Last Month only)"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="24dp" />
+
+            <Spinner
+                android:id="@+id/spinnerMonth"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_input"
+                android:padding="16dp" />
+
+            <!-- Category Selector -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Category"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="24dp" />
+
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_input"
+                android:padding="16dp" />
+
+            <!-- Add New Category Button -->
+            <Button
+                android:id="@+id/btnAddCategory"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ Add New Category"
+                android:textColor="@color/purple_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+
+            <!-- Add New Category Section (Initially Hidden) -->
+            <LinearLayout
+                android:id="@+id/layoutAddCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="16dp"
+                android:padding="16dp"
+                android:background="@drawable/rounded_input"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="New Category Name"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <EditText
+                    android:id="@+id/etNewCategoryName"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/rounded_input"
+                    android:padding="12dp"
+                    android:hint="Enter category name"
+                    android:inputType="textCapWords" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <Button
+                        android:id="@+id/btnCancelNewCategory"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cancel"
+                        android:textColor="@color/text_secondary" />
+
+                    <Button
+                        android:id="@+id/btnSaveNewCategory"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:text="Save"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/rounded_button"
+                        android:backgroundTint="@color/purple_primary" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Save Button -->
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
+                android:text="Create"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="@color/purple_primary" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

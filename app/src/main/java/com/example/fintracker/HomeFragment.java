@@ -30,18 +30,17 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+@SuppressWarnings("ALL")
 public class HomeFragment extends Fragment {
 
     private TextView tvAccountBalance, tvIncome, tvExpense;
     private LineChart spendFrequencyChart;
     private TransactionAdapter adapter;
-    private RecyclerView rvRecentTransactions;
 
     private final List<Transaction> recentTransactions = new ArrayList<>();
     private final List<Transaction> allTransactions = new ArrayList<>();
@@ -67,7 +66,7 @@ public class HomeFragment extends Fragment {
         tvIncome = view.findViewById(R.id.tvIncome);
         tvExpense = view.findViewById(R.id.tvExpense);
         spendFrequencyChart = view.findViewById(R.id.spendFrequencyChart);
-        rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
+        RecyclerView rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
 
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentTransactions.setNestedScrollingEnabled(false);
@@ -94,6 +93,25 @@ public class HomeFragment extends Fragment {
         if (mAuth.getCurrentUser() != null) {
             loadTransactions();
         }
+    }
+    private void updateBudgetSpending(String category, double amount) {
+        assert mAuth.getCurrentUser() != null;
+        String userId = mAuth.getCurrentUser().getUid();
+
+        db.collection("budgets")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("category", category)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        double currentSpent = document.getDouble("spent") != null ?
+                                document.getDouble("spent") : 0.0;
+
+                        db.collection("budgets")
+                                .document(document.getId())
+                                .update("spent", currentSpent + amount);
+                    }
+                });
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -132,12 +150,7 @@ public class HomeFragment extends Fragment {
                     }
 
                     // Sort by newest first
-                    Collections.sort(allTrans, new Comparator<Transaction>() {
-                        @Override
-                        public int compare(Transaction t1, Transaction t2) {
-                            return Long.compare(t2.getTimestamp(), t1.getTimestamp());
-                        }
-                    });
+                    allTrans.sort((t1, t2) -> Long.compare(t2.getTimestamp(), t1.getTimestamp()));
 
                     // Get top 5 for recent transactions list
                     recentTransactions.clear();
@@ -213,12 +226,7 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        Collections.sort(expenseTransactions, new Comparator<Transaction>() {
-            @Override
-            public int compare(Transaction t1, Transaction t2) {
-                return Long.compare(t1.getTimestamp(), t2.getTimestamp());
-            }
-        });
+        expenseTransactions.sort(Comparator.comparingLong(Transaction::getTimestamp));
 
         int startIndex = Math.max(0, expenseTransactions.size() - 5);
         List<Transaction> lastFive = expenseTransactions.subList(startIndex, expenseTransactions.size());

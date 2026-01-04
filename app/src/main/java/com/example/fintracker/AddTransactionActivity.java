@@ -90,6 +90,15 @@ public class AddTransactionActivity extends AppCompatActivity {
         etAmount = findViewById(R.id.etAmount);
         actvCategory = findViewById(R.id.actvCategory);
         actvWallet = findViewById(R.id.actvWallet);
+
+// Setup category dropdown to show on click
+        actvCategory.setThreshold(0);
+        actvCategory.setOnClickListener(v -> actvCategory.showDropDown());
+
+// Setup wallet dropdown
+        actvWallet.setThreshold(0);
+        actvWallet.setOnClickListener(v -> actvWallet.showDropDown());
+        actvWallet = findViewById(R.id.actvWallet);
         etDescription = findViewById(R.id.etDescription);
         etDate = findViewById(R.id.etDate);
 
@@ -158,15 +167,83 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void setupDropdowns() {
-        String[] categories = {"Shopping", "Subscription", "Food", "Transport", "Salary", "Other"};
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, categories);
-        actvCategory.setAdapter(categoryAdapter);
+        // ===== FIX FOR CATEGORY DROPDOWN =====
+        // Make category dropdown show when tapped
+        actvCategory.setThreshold(0);  // Show dropdown with 0 characters typed
+        actvCategory.setOnClickListener(v -> actvCategory.showDropDown());
+        actvCategory.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                actvCategory.showDropDown();
+            }
+        });
 
+        // Load categories from Firestore
+        loadCategoriesFromFirestore();
+
+        // ===== FIX FOR WALLET DROPDOWN =====
+        // Make wallet dropdown show when tapped
+        actvWallet.setThreshold(0);
+        actvWallet.setOnClickListener(v -> actvWallet.showDropDown());
+        actvWallet.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                actvWallet.showDropDown();
+            }
+        });
+
+        // Set wallet options
         String[] wallets = {"Cash", "Bank Account", "Credit Card", "E-Wallet"};
         ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, wallets);
         actvWallet.setAdapter(walletAdapter);
+    }
+
+    /**
+     * Load categories from Firestore
+     * Categories created in Budget will automatically appear here!
+     */
+    private void loadCategoriesFromFirestore() {
+        db.collection("categories")
+                .orderBy("name")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    java.util.List<String> categoryList = new java.util.ArrayList<>();
+
+                    // Add categories from Firestore
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String categoryName = doc.getString("name");
+                        if (categoryName != null) {
+                            categoryList.add(categoryName);
+                        }
+                    }
+
+                    // If no categories exist, add defaults
+                    if (categoryList.isEmpty()) {
+                        categoryList.add("Shopping");
+                        categoryList.add("Subscription");
+                        categoryList.add("Food");
+                        categoryList.add("Transport");
+                        categoryList.add("Salary");
+                        categoryList.add("Other");
+                    }
+
+                    // Update dropdown
+                    ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                            this, android.R.layout.simple_dropdown_item_1line,
+                            categoryList.toArray(new String[0]));
+                    actvCategory.setAdapter(categoryAdapter);
+
+                    android.util.Log.d("AddTransaction", "Loaded " + categoryList.size() + " categories");
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to defaults if Firestore fails
+                    String[] defaults = {"Shopping", "Subscription", "Food", "Transport", "Salary", "Other"};
+                    ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                            this, android.R.layout.simple_dropdown_item_1line, defaults);
+                    actvCategory.setAdapter(categoryAdapter);
+
+                    Toast.makeText(this, "Using default categories", Toast.LENGTH_SHORT).show();
+                    android.util.Log.e("AddTransaction", "Error loading categories", e);
+                });
     }
 
     private void setupAmountInput() {

@@ -1,6 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Budget Strings -->
+    <string name="save_budget">Save Budget</string>
+    <string name="no_budgets">No Budgets Yet</string>
+    <string name="create_first_budget">Tap + to create your first budget</string>
+
+    <string name="monthly_budget_amount">Monthly Budget Amount</string>
+    <string name="hint_budget_amount">500.00</string>
+    <string name="budget_info">Set a monthly spending limit for this category</string>
+    <string name="category_icon">Category Icon</string>
+    <string name="warning">Warning</string>
+    <string name="food">Food</string>
+    <string name="budget_placeholder">$0.00 of $0.00</string>
+    <string name="remaining_placeholder">Remaining $0.00</string>
+    <string name="over_budget">Over Budget!</string>
+
+    <!-- Budget Categories -->
+    <string-array name="budget_categories">
+        <item>Food</item>
+        <item>Shopping</item>
+        <item>Transportation</item>
+        <item>Subscription</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- Budget Error Messages -->
+    <string name="error_amount_required">Please enter budget amount</string>
+    <string name="error_amount_positive">Amount must be greater than 0</string>
+    <string name="error_invalid_amount">Please enter a valid amount</string>
+    <string name="error_budget_exists">Budget for %s already exists</string>
+    <string name="error_check_budget">Error checking existing budgets: </string>
+    <string name="error_create_budget">Error creating budget: </string>
+    <string name="success_budget_created">Budget created successfully!</string>
+
+
     <string name="type">Type</string>
     <string name="attachment">Attachment</string>
 
@@ -128,7 +162,7 @@
     <string name="category_other">Other</string>
     <string name="todo">TODO</string>
     <string name="december">December</string>
-    <string name="back"></string>
+    <string name="back">Back</string>
     <string name="_4_197_00">-$4,197.00</string>
     <string name="_0_00">$0.00</string>
 </resources>

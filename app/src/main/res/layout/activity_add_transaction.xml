@@ -122,7 +122,7 @@
                         android:paddingEnd="16dp"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize" />
+                        tools:ignore="VisualLintTextFieldSize,SpeakableTextPresentCheck" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Description -->
@@ -145,7 +145,7 @@
                         android:textColor="@color/text_primary"
                         android:textColorHint="#757575"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize" />
+                        tools:ignore="VisualLintTextFieldSize,TextContrastCheck" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Wallet -->
@@ -168,7 +168,7 @@
                         android:paddingEnd="16dp"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize" />
+                        tools:ignore="VisualLintTextFieldSize,SpeakableTextPresentCheck" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Date -->
@@ -193,7 +193,7 @@
                         android:textColor="@color/text_primary"
                         android:textColorHint="#757575"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize" />
+                        tools:ignore="VisualLintTextFieldSize,TextContrastCheck" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Attachment -->
