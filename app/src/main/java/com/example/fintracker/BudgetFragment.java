@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +34,7 @@ import java.util.Map;
  * BudgetFragment with Month Navigation
  *
  * Features:
- * 1. Month selector (< May >)
+ * 1. Month selector (< May >) with arrow icons
  * 2. Automatic spending calculation from transactions
  * 3. Status-based color coding (Safe/Warning/Critical/Over)
  * 4. Real-time updates via Firestore listeners
@@ -46,7 +47,7 @@ public class BudgetFragment extends Fragment {
     private LinearLayout layoutEmpty;
     private Button btnCreate;
     private TextView tvMonth;
-    private TextView btnPrevMonth, btnNextMonth;
+    private ImageView btnPrevMonth, btnNextMonth;
 
     private BudgetAdapter adapter;
     private List<Budget> budgetList = new ArrayList<>();
@@ -200,7 +201,7 @@ public class BudgetFragment extends Fragment {
         // Load all expense transactions
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
-                .whereEqualTo("type", "Expense")  // ← Capital E!
+                .whereEqualTo("type", "Expense")  // Capital E!
                 .get()
                 .addOnSuccessListener(transactionSnapshots -> {
                     Log.d(TAG, "Loaded " + transactionSnapshots.size() + " expense transactions");
@@ -210,7 +211,7 @@ public class BudgetFragment extends Fragment {
                     for (Budget budget : budgetList) {
                         spendingMap.put(budget.getId(), 0.0);
                     }
-                    Log.d(TAG, "Querying transactions for userId: " + userId);
+
                     // Calculate spending
                     int matchedTransactions = 0;
                     if (transactionSnapshots != null && !transactionSnapshots.isEmpty()) {
@@ -268,12 +269,6 @@ public class BudgetFragment extends Fragment {
         boolean categoryMatches = transactionCategory.equalsIgnoreCase(budget.getCategoryName()) ||
                 transactionCategory.equalsIgnoreCase(budget.getCategoryId());
 
-        // DEBUG LOGS
-        Log.d(TAG, "Checking match:");
-        Log.d(TAG, "  Transaction category: '" + transactionCategory + "'");
-        Log.d(TAG, "  Budget category: '" + budget.getCategoryName() + "'");
-        Log.d(TAG, "  Category matches: " + categoryMatches);
-
         if (!categoryMatches) {
             return false;
         }
@@ -289,15 +284,7 @@ public class BudgetFragment extends Fragment {
         int transMonth = transCal.get(Calendar.MONTH);
         int transYear = transCal.get(Calendar.YEAR);
 
-        boolean monthMatches = budgetMonth == transMonth && budgetYear == transYear;
-
-        // DEBUG LOGS
-        Log.d(TAG, "  Budget: " + budgetMonth + "/" + budgetYear);
-        Log.d(TAG, "  Transaction: " + transMonth + "/" + transYear);
-        Log.d(TAG, "  Month matches: " + monthMatches);
-        Log.d(TAG, "  FINAL MATCH: " + monthMatches);
-
-        return monthMatches;
+        return budgetMonth == transMonth && budgetYear == transYear;
     }
 
     private void toggleEmptyState() {

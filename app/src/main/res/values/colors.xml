@@ -6,8 +6,8 @@
     <color name="text_secondary">#757575</color>
 
     <color name="border_color">#E0E0E0</color>
-<!--    <color name="purple_light">#EEE5FF</color>-->
-<!--    <color name="border_light">#E3E5E5</color>-->
+    <!--    <color name="purple_light">#EEE5FF</color>-->
+    <!--    <color name="border_light">#E3E5E5</color>-->
     <!-- Primary Colors -->
     <color name="primary">#7F3DFF</color>
     <color name="purple_primary">#7F3DFF</color>
@@ -21,8 +21,8 @@
     <color name="background_grey">#F1F1FA</color>
 
     <!-- Text Colors -->
-<!--    <color name="text_primary">#212325</color>-->
-<!--    <color name="text_secondary">#91919F</color>-->
+    <!--    <color name="text_primary">#212325</color>-->
+    <!--    <color name="text_secondary">#91919F</color>-->
     <color name="text_hint">#C6C6C6</color>
     <color name="text_white">#FFFFFF</color>
     <color name="text_light">#FFFFFF</color>
@@ -57,6 +57,12 @@
     <!-- Chip/Button States -->
     <color name="chip_selected">#FFFFFF</color>
     <color name="chip_unselected">#EEE5FF</color>
+
+    <!-- Budget Status Colors -->
+    <color name="budget_safe">#00A86B</color>        <!-- Green: 0-70% -->
+    <color name="budget_warning">#FFA500</color>     <!-- Orange: 71-90% -->
+    <color name="budget_critical">#FF6347</color>    <!-- Tomato Red: 91-100% -->
+    <color name="budget_over">#FF0000</color>        <!-- Red: Over 100% -->
 
     <!-- Standard Android Colors -->
     <color name="black">#000000</color>

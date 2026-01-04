@@ -195,6 +195,12 @@ public class AddTransactionActivity extends AppCompatActivity {
         ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, wallets);
         actvWallet.setAdapter(walletAdapter);
+        android.util.Log.d("AddTransaction", "setupDropdowns called");
+        actvCategory.setOnClickListener(v -> {
+            android.util.Log.d("AddTransaction", "Category clicked, adapter=" + actvCategory.getAdapter());
+            actvCategory.showDropDown();
+        });
+
     }
 
     /**
@@ -202,49 +208,47 @@ public class AddTransactionActivity extends AppCompatActivity {
      * Categories created in Budget will automatically appear here!
      */
     private void loadCategoriesFromFirestore() {
+        // Static fallback (also used if Firestore is empty/fails)
+        java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>();
+        java.util.Collections.addAll(merged,
+                "Shopping", "Food", "Transport", "Subscription", "Bills",
+                "Entertainment", "Healthcare", "Salary", "Other"
+        );
+
         db.collection("categories")
                 .orderBy("name")
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    java.util.List<String> categoryList = new java.util.ArrayList<>();
-
-                    // Add categories from Firestore
-                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String categoryName = doc.getString("name");
-                        if (categoryName != null) {
-                            categoryList.add(categoryName);
-                        }
+                .addOnSuccessListener(snaps -> {
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : snaps) {
+                        String name = doc.getString("name"); // this matches CreateBudgetActivity [file:227]
+                        if (name != null && !name.trim().isEmpty()) merged.add(name.trim());
                     }
 
-                    // If no categories exist, add defaults
-                    if (categoryList.isEmpty()) {
-                        categoryList.add("Shopping");
-                        categoryList.add("Subscription");
-                        categoryList.add("Food");
-                        categoryList.add("Transport");
-                        categoryList.add("Salary");
-                        categoryList.add("Other");
-                    }
-
-                    // Update dropdown
-                    ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                            this, android.R.layout.simple_dropdown_item_1line,
-                            categoryList.toArray(new String[0]));
-                    actvCategory.setAdapter(categoryAdapter);
-
-                    android.util.Log.d("AddTransaction", "Loaded " + categoryList.size() + " categories");
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            new java.util.ArrayList<>(merged)
+                    );
+                    actvCategory.setAdapter(adapter);
                 })
                 .addOnFailureListener(e -> {
-                    // Fallback to defaults if Firestore fails
-                    String[] defaults = {"Shopping", "Subscription", "Food", "Transport", "Salary", "Other"};
-                    ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                            this, android.R.layout.simple_dropdown_item_1line, defaults);
-                    actvCategory.setAdapter(categoryAdapter);
-
+                    // Still show static list if Firestore fails
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            this,
+                            android.R.layout.simple_dropdown_item_1line,
+                            new java.util.ArrayList<>(merged)
+                    );
+                    actvCategory.setAdapter(adapter);
                     Toast.makeText(this, "Using default categories", Toast.LENGTH_SHORT).show();
-                    android.util.Log.e("AddTransaction", "Error loading categories", e);
                 });
+        android.util.Log.d("AddTransaction", "setupDropdowns called");
+        actvCategory.setOnClickListener(v -> {
+            android.util.Log.d("AddTransaction", "Category clicked, adapter=" + actvCategory.getAdapter());
+            actvCategory.showDropDown();
+        });
+
     }
+
 
     private void setupAmountInput() {
         etAmount.addTextChangedListener(new TextWatcher() {

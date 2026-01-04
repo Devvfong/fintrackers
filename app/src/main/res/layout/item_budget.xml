@@ -3,30 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@android:color/white">
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
-        <!-- Category Header -->
+        <!-- Category Header with Warning Icon -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp">
 
             <!-- Category Colored Dot -->
             <View
                 android:id="@+id/viewCategoryDot"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:background="@drawable/circle_shape" />
 
             <!-- Category Name -->
@@ -36,18 +37,23 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="12dp"
-                android:text="Shopping"
-                android:textSize="14sp"
+                android:text="@string/category_shopping"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_primary"
+                android:fontFamily="sans-serif-medium" />
 
             <!-- Warning Icon (shown when over budget) -->
             <TextView
                 android:id="@+id/ivWarning"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:text="⚠️"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/circle_shape"
+                android:backgroundTint="@color/red"
+                android:text="!"
                 android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
                 android:gravity="center"
                 android:visibility="gone" />
         </LinearLayout>
@@ -57,42 +63,54 @@
             android:id="@+id/tvRemaining"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Remaining $0"
-            android:textSize="24sp"
+            android:text="@string/remaining_placeholder"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif" />
 
-        <!-- Progress Bar -->
+        <!-- Progress Bar with Rounded Corners -->
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
+            android:layout_height="12dp"
             android:progress="0"
             android:max="100"
-            android:layout_marginBottom="8dp" />
+            android:progressDrawable="@drawable/progress_bar_rounded"
+            android:layout_marginBottom="12dp" />
 
-        <!-- Budget Info -->
-        <TextView
-            android:id="@+id/tvBudgetInfo"
-            android:layout_width="wrap_content"
+        <!-- Budget Info (Spent of Total) -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="$1200 of $1000"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <!-- Warning Text (shown when over budget) -->
-        <TextView
-            android:id="@+id/tvWarning"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="You've exceed the limit!"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/holo_red_dark"
-            android:layout_marginTop="4dp"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/tvBudgetInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/budget_placeholder"
+                android:textSize="16sp"
+                android:textColor="@color/text_secondary"
+                android:fontFamily="sans-serif" />
+
+            <!-- Warning Text (shown when over budget) -->
+            <TextView
+                android:id="@+id/tvWarning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/exceed_limit_message"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/red"
+                android:visibility="gone"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

@@ -16,6 +16,26 @@
     <string name="remaining_placeholder">Remaining $0.00</string>
     <string name="over_budget">Over Budget!</string>
 
+    <!-- NEW Budget Strings -->
+    <string name="budget_empty_message">You don\'t have a budget.\nLet\'s make one so you in control.</string>
+    <string name="remaining_format">Remaining %s</string>
+    <string name="budget_info_format" formatted="false">%s of %s</string>
+    <string name="exceed_limit_message">You\'ve exceed the limit!</string>
+    <string name="prev_month">Previous Month</string>
+    <string name="next_month">Next Month</string>
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+
     <!-- Budget Categories -->
     <string-array name="budget_categories">
         <item>Food</item>
@@ -55,13 +75,13 @@
     <string name="add_first_transaction">Tap + to add your first transaction</string>
     <string name="add_transaction">Add Transaction</string>
     <!--edit transaction-->
-<!--    <string name="edit">Edit</string>-->
+    <!--    <string name="edit">Edit</string>-->
     <string name="update">Update</string>
     <string name="saving">Saving…</string>
     <string name="save_changes_title">Save changes?</string>
     <string name="save_changes_message">Are you sure you want to save these changes?</string>
-<!--    <string name="save">Save</string>-->
-<!--    <string name="cancel">Cancel</string>-->
+    <!--    <string name="save">Save</string>-->
+    <!--    <string name="cancel">Cancel</string>-->
 
     <string name="msg_attachment_removed">Attachment removed</string>
     <string name="msg_wait_upload">Please wait for upload to finish.</string>
@@ -161,7 +181,6 @@
     <string name="category_salary">Salary</string>
     <string name="category_other">Other</string>
     <string name="todo">TODO</string>
-    <string name="december">December</string>
     <string name="back">Back</string>
     <string name="_4_197_00">-$4,197.00</string>
     <string name="_0_00">$0.00</string>

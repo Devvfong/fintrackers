@@ -9,6 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DecimalFormat;
@@ -22,9 +23,9 @@ import java.util.Map;
  * BudgetAdapter with Status-Based Colors
  *
  * Status Rules:
- * - 0-70%: Safe (Green/Category Color)
- * - 71-90%: Warning (Yellow/Orange)
- * - 91-100%: Critical (Dark Orange/Red)
+ * - 0-70%: Safe (Green)
+ * - 71-90%: Warning (Orange)
+ * - 91-100%: Critical (Tomato Red)
  * - Over 100%: Over Budget (Red)
  */
 public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetViewHolder> {
@@ -40,7 +41,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
     private boolean isDeleteMode = false;
 
     // Category colors mapping
-    private final Map<String, String> categoryColors = new HashMap<>();
+    private final Map<String, Integer> categoryColors = new HashMap<>();
 
     public BudgetAdapter(Context context, List<Budget> budgetList, Listener listener) {
         this.context = context;
@@ -50,39 +51,45 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
     }
 
     /**
-     * Initialize category colors
+     * Initialize category colors using color resources
      */
     private void initCategoryColors() {
-        categoryColors.put("Shopping", "#FCAC12");      // Orange
-        categoryColors.put("Food", "#FD3C4A");          // Red
-        categoryColors.put("Transportation", "#0077FF"); // Blue
-        categoryColors.put("Entertainment", "#7F3DFF");  // Purple
-        categoryColors.put("Bills", "#00A86B");          // Green
-        categoryColors.put("Health", "#FF6B6B");         // Light Red
-        categoryColors.put("Education", "#4ECDC4");      // Teal
-        categoryColors.put("Other", "#B4B4B4");          // Gray
-        // Add more categories as needed
+        categoryColors.put("Shopping", R.color.category_shopping);
+        categoryColors.put("Food", R.color.category_food);
+        categoryColors.put("Transportation", R.color.category_transport);
+        categoryColors.put("Transport", R.color.category_transport);
+        categoryColors.put("Entertainment", R.color.purple_primary);
+        categoryColors.put("Subscription", R.color.category_subscription);
+        categoryColors.put("Bills", R.color.green);
+        categoryColors.put("Health", R.color.red);
+        categoryColors.put("Education", R.color.blue);
+        categoryColors.put("Salary", R.color.category_salary);
+        categoryColors.put("Other", R.color.text_secondary);
+        categoryColors.put("Tennis", R.color.green);
+        categoryColors.put("Wine", R.color.red);
+        categoryColors.put("Sport", R.color.blue);
+        categoryColors.put("Test", R.color.yellow);
     }
 
     /**
-     * Get color for category
+     * Get color resource ID for category
      */
-    private String getCategoryColor(String categoryName) {
-        return categoryColors.getOrDefault(categoryName, "#7F3DFF"); // Default purple
+    private int getCategoryColorRes(String categoryName) {
+        return categoryColors.getOrDefault(categoryName, R.color.purple_primary);
     }
 
     /**
-     * Get status color based on percentage
+     * Get status color resource based on percentage
      */
-    private String getStatusColor(int percentage) {
+    private int getStatusColorRes(int percentage) {
         if (percentage <= 70) {
-            return "#00A86B"; // Safe - Green
+            return R.color.budget_safe;       // Green
         } else if (percentage <= 90) {
-            return "#FFA500"; // Warning - Orange
+            return R.color.budget_warning;    // Orange
         } else if (percentage <= 100) {
-            return "#FF6347"; // Critical - Tomato Red
+            return R.color.budget_critical;   // Tomato Red
         } else {
-            return "#FF0000"; // Over Budget - Red
+            return R.color.budget_over;       // Red
         }
     }
 
@@ -104,9 +111,10 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
 
         // 1. Set category name and color
         holder.tvCategoryName.setText(budget.getCategoryName());
-        String categoryColor = getCategoryColor(budget.getCategoryName());
+        int categoryColorRes = getCategoryColorRes(budget.getCategoryName());
+        int categoryColor = ContextCompat.getColor(context, categoryColorRes);
         holder.viewCategoryDot.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(Color.parseColor(categoryColor)));
+                android.content.res.ColorStateList.valueOf(categoryColor));
 
         // 2. Calculate percentage and status
         int percentage = budget.getPercentageSpent();
@@ -120,32 +128,45 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
                 budget.getCurrency()
         );
 
-        // 4. Set remaining amount with color
+        // 4. Set remaining amount with color using string resource
         if (isOver) {
-            holder.tvRemaining.setText("Remaining $0");
-            holder.tvRemaining.setTextColor(Color.parseColor("#FF0000")); // Red
+            holder.tvRemaining.setText(
+                    context.getString(R.string.remaining_format, "$0")
+            );
+            holder.tvRemaining.setTextColor(
+                    ContextCompat.getColor(context, R.color.budget_over)
+            );
         } else {
-            holder.tvRemaining.setText("Remaining " + formattedRemaining);
+            holder.tvRemaining.setText(
+                    context.getString(R.string.remaining_format, formattedRemaining)
+            );
 
             // Color based on status
+            int textColorRes;
             if (percentage <= 70) {
-                holder.tvRemaining.setTextColor(Color.parseColor("#212121")); // Normal black
+                textColorRes = R.color.text_primary;  // Normal black
             } else if (percentage <= 90) {
-                holder.tvRemaining.setTextColor(Color.parseColor("#FFA500")); // Warning orange
+                textColorRes = R.color.budget_warning;  // Warning orange
             } else {
-                holder.tvRemaining.setTextColor(Color.parseColor("#FF6347")); // Critical red
+                textColorRes = R.color.budget_critical;  // Critical red
             }
+            holder.tvRemaining.setTextColor(
+                    ContextCompat.getColor(context, textColorRes)
+            );
         }
 
-        // 5. Set budget info
-        holder.tvBudgetInfo.setText(formattedSpent + " of " + formattedAmount);
+        // 5. Set budget info using string resource
+        holder.tvBudgetInfo.setText(
+                context.getString(R.string.budget_info_format, formattedSpent, formattedAmount)
+        );
 
         // 6. Set progress bar
         holder.progressBar.setProgress(Math.min(100, percentage));
 
         // Progress bar color based on status
-        String progressColor = isOver ? "#FF0000" : getStatusColor(percentage);
-        holder.progressBar.getProgressDrawable().setTint(Color.parseColor(progressColor));
+        int progressColorRes = isOver ? R.color.budget_over : getStatusColorRes(percentage);
+        int progressColor = ContextCompat.getColor(context, progressColorRes);
+        holder.progressBar.getProgressDrawable().setTint(progressColor);
 
         // 7. Show/hide warning
         if (isOver) {
@@ -186,7 +207,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
         View viewCategoryDot;
         TextView tvCategoryName, tvRemaining, tvBudgetInfo, tvWarning;
         ProgressBar progressBar;
-        TextView ivWarning;  // Using TextView for emoji
+        TextView ivWarning;
 
         BudgetViewHolder(@NonNull View itemView) {
             super(itemView);

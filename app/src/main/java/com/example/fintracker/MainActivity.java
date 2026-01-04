@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,14 +16,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize Firebase Auth
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
-        // Check if user is signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if (currentUser == null) {
-            // No user is signed in, go to Login
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
@@ -31,17 +28,14 @@ public class MainActivity extends AppCompatActivity {
         // User is logged in, show main UI
         setContentView(R.layout.activity_main);
 
-        // Initialize bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 
-        // Load default fragment
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, new HomeFragment())
                     .commit();
         }
 
-        // Bottom navigation listener
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
@@ -60,9 +54,10 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragmentContainer, selectedFragment)
                         .commit();
+                return true;
             }
 
-            return true;
+            return false;
         });
     }
 }
