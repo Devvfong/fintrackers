@@ -60,6 +60,20 @@ public class TransactionFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setNestedScrollingEnabled(false);
+        View btnBack = view.findViewById(R.id.btnBack);
+
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                        requireActivity().findViewById(R.id.bottomNavigation);
+
+                if (bottomNav != null) {
+                    // IMPORTANT: change R.id.nav_home if your menu id is different
+                    bottomNav.setSelectedItemId(R.id.nav_home);
+                }
+            });
+        }
+
 
         adapter = new TransactionAdapter(requireContext(), transactionList, new TransactionAdapter.Listener() {
             @Override

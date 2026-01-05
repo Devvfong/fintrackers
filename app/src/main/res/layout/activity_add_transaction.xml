@@ -23,7 +23,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:contentDescription="@string/back"
-            android:src="@drawable/ic_arrow_back"
+            android:src="@drawable/keyboard_arrow_left_24px"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
             app:tint="@android:color/white" />

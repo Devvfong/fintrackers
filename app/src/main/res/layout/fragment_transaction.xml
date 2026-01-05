@@ -15,10 +15,22 @@
         android:gravity="center_vertical"
         android:layout_alignParentTop="true">
 
+        <!-- Back button -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/keyboard_arrow_left_24px"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back"
+            app:tint="@color/text_primary"/>
+
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="8dp"
             android:text="All Transactions"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -33,7 +45,9 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Filter"
             app:tint="@color/purple_primary"/>
+
     </LinearLayout>
+
 
     <!-- Transactions RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
