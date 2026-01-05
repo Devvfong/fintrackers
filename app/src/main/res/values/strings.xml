@@ -184,4 +184,27 @@
     <string name="back">Back</string>
     <string name="_4_197_00">-$4,197.00</string>
     <string name="_0_00">$0.00</string>
+    <string name="set_budgets">set_budgets</string>
+    <string name="create_custom_budgets_for_different_categories_and_stay_on_track_with_your_financial_goals">Create custom budgets for different categories and stay on track with your financial goals</string>
+    <string name="manage_expenses">manage_expenses</string>
+    <string name="monitor_your_spending_habits_and_manage_your_expenses_efficiently_with_detailed_categorization">Monitor your spending habits and manage your expenses efficiently with detailed categorization</string>
+    <string name="keep_track_of_all_your_income_sources_and_see_exactly_where_your_money_comes_from">Keep track of all your income sources and see exactly where your money comes from</string>
+    <string name="full_name">Full Name\n</string>
+    <string name="agree_terms">Agree and, terms conditional</string>
+    <string name="join_fintrack">Join FINTRACK</string>
+    <string name="create_account">Create Account</string>
+    <string name="sign_up_to_get_started">Sign up to get started</string>
+    <string name="skip">skip\n</string>
+    <string name="next">next</string>
+    <string name="or">or\n</string>
+    <string name="welcome_back">Welcome Back!</string>
+    <string name="sign_in">Sign In</string>
+    <string name="login_to_your_account">Login to your account</string>
+    <string name="amount">Amount</string>
+    <string name="currency_usd_or_khr_only">Currency (USD or KHR only)</string>
+    <string name="create">Create</string>
+    <string name="enter_category_name">Enter category name</string>
+    <string name="month_this_month_or_last_month_only">Month (This Month or Last Month only)</string>
+    <string name="add_new_category">+ Add New Category</string>
+    <string name="new_category_name">New Category Name</string>
 </resources>

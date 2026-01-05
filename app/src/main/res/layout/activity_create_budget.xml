@@ -34,7 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Create Budget"
+                android:text="@string/create_budget"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
@@ -53,7 +53,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Amount"
+                android:text="@string/amount"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary" />
@@ -73,7 +73,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Currency (USD or KHR only)"
+                android:text="@string/currency_usd_or_khr_only"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
@@ -91,7 +91,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Month (This Month or Last Month only)"
+                android:text="@string/month_this_month_or_last_month_only"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
@@ -109,7 +109,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Category"
+                android:text="@string/category"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary"
@@ -129,7 +129,7 @@
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+ Add New Category"
+                android:text="@string/add_new_category"
                 android:textColor="@color/purple_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -149,7 +149,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New Category Name"
+                    android:text="@string/new_category_name"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary" />
@@ -161,10 +161,11 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/rounded_input"
                     android:padding="12dp"
-                    android:hint="Enter category name"
+                    android:hint="@string/enter_category_name"
                     android:inputType="textCapWords" />
 
                 <LinearLayout
+                    style="?android:attr/buttonBarStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -181,6 +182,7 @@
 
                     <Button
                         android:id="@+id/btnSaveNewCategory"
+                        style="?android:attr/buttonBarButtonStyle"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
@@ -197,7 +199,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
-                android:text="Create"
+                android:text="@string/create"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"

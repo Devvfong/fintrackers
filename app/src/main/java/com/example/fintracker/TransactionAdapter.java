@@ -107,7 +107,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             return;
         }
 
-        // Your original transaction binding code
+        //original transaction binding code
         TransactionViewHolder vh = (TransactionViewHolder) holder;
         Transaction transaction = item.getTransaction();
 
