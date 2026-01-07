@@ -4,11 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-@SuppressWarnings("ALL")
-public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.OnboardingViewHolder> {
+public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.ViewHolder> {
 
     private final Context context;
     private final int[] layouts;
@@ -20,14 +20,14 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
 
     @NonNull
     @Override
-    public OnboardingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(layouts[viewType], parent, false);
-        return new OnboardingViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(viewType, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull OnboardingViewHolder holder, int position) {
-        // Views are already set in the layout files
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        // Static layouts, no binding needed
     }
 
     @Override
@@ -37,11 +37,11 @@ public class OnboardingAdapter extends RecyclerView.Adapter<OnboardingAdapter.On
 
     @Override
     public int getItemViewType(int position) {
-        return position;
+        return layouts[position];
     }
 
-    static class OnboardingViewHolder extends RecyclerView.ViewHolder {
-        public OnboardingViewHolder(@NonNull View itemView) {
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }

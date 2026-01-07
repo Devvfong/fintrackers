@@ -1,292 +1,63 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background_white"
-    android:fillViewport="true">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="100dp">
-
-        <!-- Header -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="20dp"
-            android:background="@color/background_white"
-            android:elevation="2dp">
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/purple_light">
-
-                <ImageView
-                    android:id="@+id/ivProfile"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_profile"
-                    android:padding="12dp"
-                    app:tint="@color/purple_primary"/>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background_white" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="100dp">
+        <!--  Header  -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:padding="36dp" android:background="@color/background_white" android:elevation="2dp">
+            <androidx.cardview.widget.CardView android:layout_width="48dp" android:layout_height="48dp" app:cardCornerRadius="24dp" app:cardElevation="0dp" app:cardBackgroundColor="@color/purple_light">
+                <ImageView android:id="@+id/ivProfile" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/ic_profile" android:padding="12dp" app:tint="@color/purple_primary"/>
             </androidx.cardview.widget.CardView>
-
-            <TextView
-                android:id="@+id/tvMonth"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="January"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:drawablePadding="8dp"
-                app:drawableEndCompat="@drawable/ic_arrow_down"
-                app:drawableTint="@color/purple_primary" />
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/purple_light">
-
-                <ImageView
-                    android:id="@+id/ivNotification"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_notification"
-                    android:padding="12dp"
-                    app:tint="@color/purple_primary"
-                    android:contentDescription="Notifications"/>
+            <TextView android:id="@+id/tvMonth" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="January" android:textSize="18sp" android:textColor="@color/text_primary" android:textStyle="bold" android:gravity="center" android:drawablePadding="8dp" app:drawableEndCompat="@drawable/ic_arrow_down" app:drawableTint="@color/purple_primary"/>
+            <androidx.cardview.widget.CardView android:layout_width="48dp" android:layout_height="48dp" app:cardCornerRadius="24dp" app:cardElevation="0dp" app:cardBackgroundColor="@color/purple_light">
+                <ImageView android:id="@+id/ivNotification" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/ic_notification" android:padding="12dp" app:tint="@color/purple_primary" android:contentDescription="Notifications"/>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
-
-        <!-- Account Balance Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Account Balance"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_secondary"
-                    android:layout_marginBottom="8dp"/>
-
-                <TextView
-                    android:id="@+id/tvAccountBalance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="$4,197.00"
-                    android:textSize="40sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
-                    android:singleLine="true"
-                    android:ellipsize="end"/>
+        <!--  Account Balance Card  -->
+        <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="20dp" android:layout_marginEnd="20dp" android:layout_marginTop="16dp" app:cardCornerRadius="20dp" app:cardElevation="2dp" app:cardBackgroundColor="@android:color/white">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp" android:gravity="center">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Account Balance" android:textSize="14sp" android:textColor="@color/text_secondary" android:layout_marginBottom="8dp"/>
+                <TextView android:id="@+id/tvAccountBalance" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$4,197.00" android:textSize="40sp" android:textColor="@color/text_primary" android:textStyle="bold" android:singleLine="true" android:ellipsize="end"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- Income/Expense Cards -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="24dp">
-
-            <!-- Income Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/green_income">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_income"
-                        app:tint="@android:color/white"
-                        android:layout_marginBottom="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Income"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/white"
-                        android:alpha="0.8"/>
-
-                    <TextView
-                        android:id="@+id/tvIncome"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="$0.00"
-                        android:textSize="22sp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:layout_marginTop="4dp"/>
+        <!--  Income/Expense Cards  -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginStart="20dp" android:layout_marginEnd="20dp" android:layout_marginTop="24dp">
+            <!--  Income Card  -->
+            <androidx.cardview.widget.CardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="8dp" app:cardCornerRadius="20dp" app:cardElevation="2dp" app:cardBackgroundColor="@color/green_income">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_income" app:tint="@android:color/white" android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Income" android:textSize="14sp" android:textColor="@android:color/white" android:alpha="0.8"/>
+                    <TextView android:id="@+id/tvIncome" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$0.00" android:textSize="22sp" android:textColor="@android:color/white" android:textStyle="bold" android:singleLine="true" android:ellipsize="end" android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <!-- Expense Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/red_expense">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_expense"
-                        app:tint="@android:color/white"
-                        android:layout_marginBottom="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Expenses"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/white"
-                        android:alpha="0.8"/>
-
-                    <TextView
-                        android:id="@+id/tvExpense"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="$4,197.00"
-                        android:textSize="22sp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:layout_marginTop="4dp"/>
+            <!--  Expense Card  -->
+            <androidx.cardview.widget.CardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" app:cardCornerRadius="20dp" app:cardElevation="2dp" app:cardBackgroundColor="@color/red_expense">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_expense" app:tint="@android:color/white" android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Expenses" android:textSize="14sp" android:textColor="@android:color/white" android:alpha="0.8"/>
+                    <TextView android:id="@+id/tvExpense" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="$4,197.00" android:textSize="22sp" android:textColor="@android:color/white" android:textStyle="bold" android:singleLine="true" android:ellipsize="end" android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
-
-        <!-- Spend Frequency Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Spend Frequency"
-                android:textSize="18sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
-
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/spendFrequencyChart"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="16dp"/>
+        <!--  Spend Frequency Section  -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_margin="20dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Spend Frequency" android:textSize="18sp" android:textColor="@color/text_primary" android:textStyle="bold" android:layout_marginBottom="16dp"/>
+            <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="180dp" app:cardCornerRadius="20dp" app:cardElevation="2dp" app:cardBackgroundColor="@android:color/white">
+                <com.github.mikephil.charting.charts.LineChart android:id="@+id/spendFrequencyChart" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="16dp"/>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
-
-        <!-- Recent Transactions Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp">
-
-            <!-- Header -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Recent Transaction"
-                    android:textSize="18sp"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/tvSeeAll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="See All"
-                    android:textSize="14sp"
-                    android:textColor="@color/purple_primary"
-                    android:textStyle="bold"
-                    android:background="?attr/selectableItemBackground"
-                    android:padding="8dp"/>
+        <!--  Recent Transactions Section  -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="20dp" android:paddingEnd="20dp">
+            <!--  Header  -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Recent Transaction" android:textSize="18sp" android:textColor="@color/text_primary" android:textStyle="bold"/>
+                <TextView android:id="@+id/tvSeeAll" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="See All" android:textSize="14sp" android:textColor="@color/purple_primary" android:textStyle="bold" android:background="?attr/selectableItemBackground" android:padding="8dp"/>
             </LinearLayout>
-
-            <!-- Recent Transactions RecyclerView -->
+            <!--  Recent Transactions RecyclerView  -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRecentTransactions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="450dp"
+                android:minHeight="500dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_transaction" />
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

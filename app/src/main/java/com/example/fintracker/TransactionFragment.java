@@ -27,11 +27,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings("ALL")
+
 public class TransactionFragment extends Fragment {
     private RecyclerView recyclerView;
     private TransactionAdapter adapter;
@@ -197,10 +196,10 @@ public class TransactionFragment extends Fragment {
                 transactionList.sort((t1, t2) -> Long.compare(t2.getTimestamp(), t1.getTimestamp()));
                 break;
             case "Oldest First":
-                transactionList.sort((t1, t2) -> Long.compare(t1.getTimestamp(), t2.getTimestamp()));
+                transactionList.sort(Comparator.comparingLong(Transaction::getTimestamp));
                 break;
             case "Highest Amount":
-                Collections.sort(transactionList, (t1, t2) -> Double.compare(t2.getAmount(), t1.getAmount()));
+                transactionList.sort((t1, t2) -> Double.compare(t2.getAmount(), t1.getAmount()));
                 break;
             case "Lowest Amount":
                 transactionList.sort(Comparator.comparingDouble(Transaction::getAmount));

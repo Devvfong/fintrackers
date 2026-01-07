@@ -23,7 +23,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:contentDescription="@string/back"
-            android:src="@drawable/keyboard_arrow_left_24px"
+            android:src="@drawable/ic_arrow_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="centerInside"
             app:tint="@android:color/white" />
@@ -122,7 +122,7 @@
                         android:paddingEnd="16dp"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize,SpeakableTextPresentCheck" />
+                        tools:ignore="VisualLintTextFieldSize" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Description -->
@@ -145,7 +145,7 @@
                         android:textColor="@color/text_primary"
                         android:textColorHint="#757575"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize,TextContrastCheck" />
+                        tools:ignore="VisualLintTextFieldSize" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Wallet -->
@@ -168,7 +168,7 @@
                         android:paddingEnd="16dp"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize,SpeakableTextPresentCheck" />
+                        tools:ignore="VisualLintTextFieldSize" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Date -->
@@ -193,7 +193,7 @@
                         android:textColor="@color/text_primary"
                         android:textColorHint="#757575"
                         android:textSize="16sp"
-                        tools:ignore="VisualLintTextFieldSize,TextContrastCheck" />
+                        tools:ignore="VisualLintTextFieldSize" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Attachment -->
@@ -216,7 +216,7 @@
                         android:focusable="true">
 
 
-                    <ImageView
+                        <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_attachment"
@@ -265,43 +265,6 @@
 
                     </FrameLayout>
 
-                </LinearLayout>
-
-                <!-- Repeat -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/repeat"
-                            android:textSize="16sp"
-                            android:textColor="@color/text_primary"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/repeat_transaction"
-                            android:textColor="#757575"
-                            android:textSize="13sp" />
-                    </LinearLayout>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchRepeat"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
                 </LinearLayout>
 
             </LinearLayout>

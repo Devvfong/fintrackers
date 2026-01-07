@@ -1,13 +1,16 @@
 package com.example.fintracker;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,21 +25,23 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
 
     public interface Listener {
         void onRowClick(Budget budget);
-        void onEditClick(Budget budget);      // kept for future (edit button/icon)
-        void onCheckboxChanged();             // kept (not used in your current layout)
+        void onEditClick(Budget budget);
+        void onExtendClick(Budget budget);
+        void onCheckboxChanged();
     }
 
     private final Context context;
     private final List<Budget> budgetList;
     private final Listener listener;
-
     private final Map<String, Integer> categoryColors = new HashMap<>();
+    private final Map<String, Integer> categoryIcons = new HashMap<>();
 
     public BudgetAdapter(Context context, List<Budget> budgetList, Listener listener) {
         this.context = context;
         this.budgetList = budgetList;
         this.listener = listener;
         initCategoryColors();
+        initCategoryIcons();
     }
 
     private void initCategoryColors() {
@@ -51,11 +56,57 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
         categoryColors.put("Education", R.color.blue);
         categoryColors.put("Salary", R.color.category_salary);
         categoryColors.put("Other", R.color.text_secondary);
+
+        // Custom names
+        categoryColors.put("Tennis", R.color.green);
+        categoryColors.put("Wine", R.color.red);
+        categoryColors.put("Sport", R.color.blue);
+        categoryColors.put("Test", R.color.yellow);
+    }
+
+    /**
+     * Initialize category icons using REAL icons from drawable folder
+     * DEFAULT FALLBACK: other_admission_24px
+     */
+    private void initCategoryIcons() {
+        // Shopping - shopping bag icon
+        categoryIcons.put("Shopping", R.drawable.shopping_bag_24px);
+
+        // Food/Wine - meal icon
+        categoryIcons.put("Food", R.drawable.award_meal_24px);
+        categoryIcons.put("Wine", R.drawable.award_meal_24px);
+
+        // Transportation - transportation icon
+        categoryIcons.put("Transportation", R.drawable.emoji_transportation_24px);
+        categoryIcons.put("Transport", R.drawable.emoji_transportation_24px);
+
+        // Entertainment - admission icon (default for unknown too)
+        categoryIcons.put("Entertainment", R.drawable.other_admission_24px);
+
+        // Subscription - subscription icon
+        categoryIcons.put("Subscription", R.drawable.subscriptions_24px);
+
+        // Bills - money icon
+        categoryIcons.put("Bills", R.drawable.attach_money_24px);
+
+        // Salary - money icon
+        categoryIcons.put("Salary", R.drawable.attach_money_24px);
+
+        // If no specific mapping, getCategoryIcon() will return other_admission_24px as default
     }
 
     private int getCategoryColorRes(String categoryName) {
         Integer res = categoryColors.get(categoryName);
         return res != null ? res : R.color.purple_primary;
+    }
+
+    /**
+     * Get category icon - returns other_admission_24px as default
+     */
+    private int getCategoryIcon(String categoryName) {
+        Integer icon = categoryIcons.get(categoryName);
+        // DEFAULT: other_admission_24px for any unmapped category
+        return icon != null ? icon : R.drawable.other_admission_24px;
     }
 
     private int getStatusColorRes(int percentage) {
@@ -80,9 +131,14 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
 
         int categoryColorRes = getCategoryColorRes(budget.getCategoryName());
         int categoryColor = ContextCompat.getColor(context, categoryColorRes);
-        holder.viewCategoryDot.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(categoryColor)
-        );
+
+        // Set dot color
+        holder.viewCategoryDot.setBackgroundTintList(ColorStateList.valueOf(categoryColor));
+
+        // Set category icon and background color
+        int categoryIcon = getCategoryIcon(budget.getCategoryName());
+        holder.ivCategoryIcon.setImageResource(categoryIcon);
+        holder.cvCategoryIcon.setCardBackgroundColor(categoryColor);
 
         int percentage = budget.getPercentageSpent();
         boolean isOver = budget.isExceeded();
@@ -117,9 +173,17 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
         if (isOver) {
             holder.ivWarning.setVisibility(View.VISIBLE);
             holder.tvWarning.setVisibility(View.VISIBLE);
+
+            holder.tvExtend.setVisibility(View.VISIBLE);
+            holder.tvExtend.setOnClickListener(v -> {
+                if (listener != null) listener.onExtendClick(budget);
+            });
         } else {
             holder.ivWarning.setVisibility(View.GONE);
             holder.tvWarning.setVisibility(View.GONE);
+
+            holder.tvExtend.setVisibility(View.GONE);
+            holder.tvExtend.setOnClickListener(null);
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -143,13 +207,19 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
     }
 
     static class BudgetViewHolder extends RecyclerView.ViewHolder {
+
+        CardView cvCategoryIcon;
+        ImageView ivCategoryIcon;
         View viewCategoryDot;
         TextView tvCategoryName, tvRemaining, tvBudgetInfo, tvWarning;
         ProgressBar progressBar;
         TextView ivWarning;
+        TextView tvExtend;
 
         BudgetViewHolder(@NonNull View itemView) {
             super(itemView);
+            cvCategoryIcon = itemView.findViewById(R.id.cvCategoryIcon);
+            ivCategoryIcon = itemView.findViewById(R.id.ivCategoryIcon);
             viewCategoryDot = itemView.findViewById(R.id.viewCategoryDot);
             tvCategoryName = itemView.findViewById(R.id.tvCategoryName);
             tvRemaining = itemView.findViewById(R.id.tvRemaining);
@@ -157,6 +227,7 @@ public class BudgetAdapter extends RecyclerView.Adapter<BudgetAdapter.BudgetView
             tvWarning = itemView.findViewById(R.id.tvWarning);
             progressBar = itemView.findViewById(R.id.progressBar);
             ivWarning = itemView.findViewById(R.id.ivWarning);
+            tvExtend = itemView.findViewById(R.id.tvExtend);
         }
     }
 }

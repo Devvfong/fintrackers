@@ -2,11 +2,13 @@ package com.example.fintracker;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,14 +54,11 @@ public class BudgetFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-
         currentMonth = Calendar.getInstance();
 
         initViews(view);
@@ -82,7 +82,6 @@ public class BudgetFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new BudgetAdapter(requireContext(), budgetList, new BudgetAdapter.Listener() {
-
             @Override
             public void onRowClick(Budget budget) {
                 Intent i = new Intent(requireContext(), DetailBudgetActivity.class);
@@ -98,8 +97,13 @@ public class BudgetFragment extends Fragment {
             }
 
             @Override
+            public void onExtendClick(Budget budget) {
+                showExtendBudgetDialog(budget);
+            }
+
+            @Override
             public void onCheckboxChanged() {
-                // Not used in this version
+                // Not used in this adapter currently
             }
         });
 
@@ -124,8 +128,18 @@ public class BudgetFragment extends Fragment {
     }
 
     private void updateMonthDisplay() {
-        SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM", Locale.getDefault());
+        SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
         tvMonth.setText(monthFormat.format(currentMonth.getTime()));
+    }
+
+    private long getCurrentMonthStartTimestamp() {
+        Calendar monthStart = (Calendar) currentMonth.clone();
+        monthStart.set(Calendar.DAY_OF_MONTH, 1);
+        monthStart.set(Calendar.HOUR_OF_DAY, 0);
+        monthStart.set(Calendar.MINUTE, 0);
+        monthStart.set(Calendar.SECOND, 0);
+        monthStart.set(Calendar.MILLISECOND, 0);
+        return monthStart.getTimeInMillis();
     }
 
     private void loadBudgetsForMonth() {
@@ -135,20 +149,14 @@ public class BudgetFragment extends Fragment {
         }
 
         String userId = mAuth.getCurrentUser().getUid();
+        long monthTimestamp = getCurrentMonthStartTimestamp();
 
-        Calendar monthStart = (Calendar) currentMonth.clone();
-        monthStart.set(Calendar.DAY_OF_MONTH, 1);
-        monthStart.set(Calendar.HOUR_OF_DAY, 0);
-        monthStart.set(Calendar.MINUTE, 0);
-        monthStart.set(Calendar.SECOND, 0);
-        monthStart.set(Calendar.MILLISECOND, 0);
+        Log.d(TAG, "Loading budgets for month " + monthTimestamp);
 
-        long monthTimestamp = monthStart.getTimeInMillis();
-        Log.d(TAG, "Loading budgets for month: " + monthTimestamp);
-
+        // New model field: startDate (period start)
         db.collection("budgets")
                 .whereEqualTo("userId", userId)
-                .whereEqualTo("monthTimestamp", monthTimestamp)
+                .whereEqualTo("startDate", monthTimestamp)
                 .addSnapshotListener((budgetSnapshots, budgetError) -> {
                     if (budgetError != null) {
                         Log.e(TAG, "Error loading budgets", budgetError);
@@ -167,18 +175,52 @@ public class BudgetFragment extends Fragment {
 
                         if (!isCalculating) {
                             calculateSpendingForBudgets(userId);
+                        } else {
+                            adapter.notifyDataSetChanged();
+                            toggleEmptyState();
+                        }
+                    } else {
+                        // Fallback: legacy field monthTimestamp
+                        loadBudgetsForMonthLegacy(userId, monthTimestamp);
+                    }
+                });
+    }
+
+    private void loadBudgetsForMonthLegacy(String userId, long monthTimestamp) {
+        db.collection("budgets")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("monthTimestamp", monthTimestamp)
+                .get()
+                .addOnSuccessListener(budgetSnapshots -> {
+                    budgetList.clear();
+
+                    if (budgetSnapshots != null && !budgetSnapshots.isEmpty()) {
+                        for (QueryDocumentSnapshot doc : budgetSnapshots) {
+                            Budget budget = doc.toObject(Budget.class);
+                            budget.setId(doc.getId());
+                            budgetList.add(budget);
+                        }
+
+                        if (!isCalculating) {
+                            calculateSpendingForBudgets(userId);
+                        } else {
+                            adapter.notifyDataSetChanged();
+                            toggleEmptyState();
                         }
                     } else {
                         adapter.notifyDataSetChanged();
                         toggleEmptyState();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading budgets (legacy)", e);
+                    adapter.notifyDataSetChanged();
+                    toggleEmptyState();
                 });
     }
 
     private void calculateSpendingForBudgets(String userId) {
-        if (budgetList.isEmpty()) {
-            return;
-        }
+        if (budgetList.isEmpty()) return;
 
         isCalculating = true;
 
@@ -187,10 +229,9 @@ public class BudgetFragment extends Fragment {
                 .whereEqualTo("type", "Expense")
                 .get()
                 .addOnSuccessListener(transactionSnapshots -> {
-
                     Map<String, Double> spendingMap = new HashMap<>();
                     for (Budget budget : budgetList) {
-                        spendingMap.put(budget.getId(), 0.0);
+                        if (budget.getId() != null) spendingMap.put(budget.getId(), 0.0);
                     }
 
                     if (transactionSnapshots != null && !transactionSnapshots.isEmpty()) {
@@ -204,8 +245,10 @@ public class BudgetFragment extends Fragment {
                             for (Budget budget : budgetList) {
                                 if (doesTransactionMatchBudget(budget, category, timestamp)) {
                                     String budgetId = budget.getId();
-                                    double currentSpending = spendingMap.getOrDefault(budgetId, 0.0);
-                                    spendingMap.put(budgetId, currentSpending + amount);
+                                    if (budgetId == null) continue;
+
+                                    double current = spendingMap.getOrDefault(budgetId, 0.0);
+                                    spendingMap.put(budgetId, current + amount);
                                 }
                             }
                         }
@@ -219,7 +262,6 @@ public class BudgetFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                     toggleEmptyState();
                     isCalculating = false;
-
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error calculating spending", e);
@@ -231,6 +273,8 @@ public class BudgetFragment extends Fragment {
     }
 
     private boolean doesTransactionMatchBudget(Budget budget, String transactionCategory, long transactionTimestamp) {
+        if (budget == null) return false;
+
         boolean categoryMatches =
                 transactionCategory.equalsIgnoreCase(budget.getCategoryName()) ||
                         transactionCategory.equalsIgnoreCase(budget.getCategoryId());
@@ -238,18 +282,13 @@ public class BudgetFragment extends Fragment {
         if (!categoryMatches) return false;
 
         Calendar budgetCal = Calendar.getInstance();
-        budgetCal.setTimeInMillis(budget.getMonthTimestamp());
+        budgetCal.setTimeInMillis(budget.getStartDate()); // new canonical field [file:120]
 
         Calendar transCal = Calendar.getInstance();
         transCal.setTimeInMillis(transactionTimestamp);
 
-        int budgetMonth = budgetCal.get(Calendar.MONTH);
-        int budgetYear = budgetCal.get(Calendar.YEAR);
-
-        int transMonth = transCal.get(Calendar.MONTH);
-        int transYear = transCal.get(Calendar.YEAR);
-
-        return budgetMonth == transMonth && budgetYear == transYear;
+        return budgetCal.get(Calendar.MONTH) == transCal.get(Calendar.MONTH)
+                && budgetCal.get(Calendar.YEAR) == transCal.get(Calendar.YEAR);
     }
 
     private void toggleEmptyState() {
@@ -267,11 +306,59 @@ public class BudgetFragment extends Fragment {
         startActivity(intent);
     }
 
+    private void showExtendBudgetDialog(Budget budget) {
+        if (budget == null || budget.getId() == null) return;
+
+        final EditText et = new EditText(requireContext());
+        et.setHint("Enter new amount (ex: 4000)");
+        et.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Extend Budget")
+                .setMessage("Current: " + budget.getAmount() + "  Spent: " + budget.getSpent())
+                .setView(et)
+                .setPositiveButton("Update", (d, w) -> {
+                    String txt = et.getText().toString().trim();
+                    if (txt.isEmpty()) {
+                        Toast.makeText(requireContext(), "Please enter amount", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    double newAmount;
+                    try {
+                        newAmount = Double.parseDouble(txt);
+                    } catch (Exception e) {
+                        Toast.makeText(requireContext(), "Invalid amount", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (newAmount <= budget.getAmount()) {
+                        Toast.makeText(requireContext(), "New amount must be greater than current", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if (newAmount <= budget.getSpent()) {
+                        Toast.makeText(requireContext(), "New amount must be greater than spent", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    updateBudgetAmountForExtend(budget.getId(), newAmount);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void updateBudgetAmountForExtend(String budgetId, double newAmount) {
+        db.collection("budgets")
+                .document(budgetId)
+                .update("amount", newAmount, "updatedAt", System.currentTimeMillis())
+                .addOnSuccessListener(v -> Toast.makeText(requireContext(), "Budget updated", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(requireContext(), "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-        if (!isCalculating) {
-            loadBudgetsForMonth();
-        }
+        if (!isCalculating) loadBudgetsForMonth();
     }
 }

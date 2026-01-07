@@ -40,37 +40,35 @@
             android:weightSum="2">
 
             <!-- Skip Button -->
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/btnSkip"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="@string/skip"
+                android:text="Skip"
                 android:textColor="@color/purple_primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textAllCaps="false"
-                app:strokeColor="@color/purple_primary"
-                app:strokeWidth="2dp"
-                app:cornerRadius="16dp"
-                app:backgroundTint="@color/white"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="@color/white"
+                style="?android:attr/borderlessButtonStyle" />
 
             <!-- Next/Get Started Button -->
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/btnNext"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="@string/next"
+                android:text="Next"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textAllCaps="false"
-                app:backgroundTint="@color/purple_primary"
-                app:cornerRadius="16dp" />
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="@color/purple_primary" />
         </LinearLayout>
     </LinearLayout>
 

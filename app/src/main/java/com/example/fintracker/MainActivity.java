@@ -1,7 +1,10 @@
 package com.example.fintracker;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -27,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
 
         // User is logged in, show main UI
         setContentView(R.layout.activity_main);
+
+        // ============================================
+        // FONT CHECK - Check if Poppins is working
+        // ============================================
+        checkPoppinsFont();
+        // ============================================
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 
@@ -59,5 +68,33 @@ public class MainActivity extends AppCompatActivity {
 
             return false;
         });
+    }
+
+    /**
+     * Check if Poppins font is properly loaded
+     */
+    private void checkPoppinsFont() {
+        try {
+            // Create a test TextView programmatically
+            TextView testTextView = new TextView(this);
+            testTextView.setTypeface(getResources().getFont(R.font.poppins));
+
+            Typeface typeface = testTextView.getTypeface();
+
+            Log.d("FONT_CHECK", "=====================");
+            Log.d("FONT_CHECK", "Poppins Font Check:");
+            Log.d("FONT_CHECK", "Typeface: " + typeface.toString());
+            Log.d("FONT_CHECK", "Is Bold: " + typeface.isBold());
+            Log.d("FONT_CHECK", "Is Italic: " + typeface.isItalic());
+            Log.d("FONT_CHECK", "=====================");
+            Log.d("FONT_CHECK", "✅ Poppins font loaded successfully!");
+
+        } catch (Exception e) {
+            Log.e("FONT_CHECK", "=====================");
+            Log.e("FONT_CHECK", "❌ ERROR: Poppins font failed to load!");
+            Log.e("FONT_CHECK", "Error: " + e.getMessage());
+            Log.e("FONT_CHECK", "=====================");
+            e.printStackTrace();
+        }
     }
 }

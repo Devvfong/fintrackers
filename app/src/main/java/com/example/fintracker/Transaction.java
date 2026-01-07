@@ -25,6 +25,7 @@ public class Transaction {
     // Additional fields for compatibility
     private String wallet;          // Wallet/payment method
     private String attachmentUrl;   // Receipt/attachment URL
+    private boolean isRepeated;
 
     // For multi-select (not saved to Firestore)
     private boolean isSelected = false;
@@ -156,5 +157,13 @@ public class Transaction {
 
     public void setAttachmentUrl(String attachmentUrl) {
         this.attachmentUrl = attachmentUrl;
+    }
+
+    public boolean isRepeated() {
+        return isRepeated;
+    }
+
+    public void setRepeated(boolean repeated) {
+        isRepeated = repeated;
     }
 }

@@ -1,130 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/purple_primary">
-
-    <!-- Header with Month Navigation -->
-    <LinearLayout
-        android:id="@+id/layoutHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/purple_primary"
-        android:paddingTop="46dp"
-        android:paddingBottom="24dp">
-
-        <!-- Month Navigation -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <!-- Previous Month Button -->
-            <ImageView
-                android:id="@+id/btnPrevMonth"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/keyboard_arrow_left_24px"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/prev_month"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="12dp"
-                app:tint="@color/text_white" />
-
-            <!-- Current Month -->
-            <TextView
-                android:id="@+id/tvMonth"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/january"
-                android:textColor="@color/text_white"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <!-- Next Month Button -->
-            <ImageView
-                android:id="@+id/btnNextMonth"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/keyboard_arrow_right_24px"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/next_month"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="12dp"
-                app:tint="@color/text_white" />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/purple_primary">
+    <!--  Header with Month Navigation  -->
+    <LinearLayout android:id="@+id/layoutHeader" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@color/purple_primary" android:paddingTop="46dp" android:paddingBottom="24dp">
+        <!--  Month Navigation  -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+            <!--  Previous Month Button  -->
+            <ImageView android:id="@+id/btnPrevMonth" android:layout_width="48dp" android:layout_height="48dp" android:src="@drawable/keyboard_arrow_left_24px" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/prev_month" android:clickable="true" android:focusable="true" android:padding="12dp" app:tint="@color/text_white"/>
+            <!--  Current Month  -->
+            <TextView android:id="@+id/tvMonth" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="@string/january" android:textColor="@color/text_white" android:textSize="24sp" android:textStyle="bold"/>
+            <!--  Next Month Button  -->
+            <ImageView android:id="@+id/btnNextMonth" android:layout_width="48dp" android:layout_height="48dp" android:src="@drawable/keyboard_arrow_right_24px" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/next_month" android:clickable="true" android:focusable="true" android:padding="12dp" app:tint="@color/text_white"/>
         </LinearLayout>
     </LinearLayout>
-
-    <!-- White Rounded Background Container -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/layoutHeader"
-        android:background="@drawable/rounded_top_background">
-
-        <!-- Budget List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvBudgets"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/btnCreate"
-            android:layout_marginBottom="48dp"
-            android:clipToPadding="false"
-            android:paddingStart="16dp"
-            android:paddingTop="24dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="8dp" />
-
-        <!-- Empty State -->
-        <LinearLayout
-            android:id="@+id/layoutEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/btnCreate"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="40dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/budget_empty_message"
-                android:textSize="16sp"
-                android:textColor="@color/text_secondary"
-                android:gravity="center"
-                android:lineSpacingExtra="4dp" />
+    <!--  White Rounded Background Container  -->
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/layoutHeader" android:background="@drawable/rounded_top_background">
+        <!--  Budget List  -->
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvBudgets" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/btnCreate" android:layout_marginBottom="48dp" android:clipToPadding="false" android:paddingStart="16dp" android:paddingTop="24dp" android:paddingEnd="16dp" android:paddingBottom="8dp"/>
+        <!--  Empty State  -->
+        <LinearLayout android:id="@+id/layoutEmpty" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_above="@id/btnCreate" android:orientation="vertical" android:gravity="center" android:padding="40dp" android:visibility="gone">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/budget_empty_message" android:textSize="16sp" android:textColor="@color/text_secondary" android:gravity="center" android:lineSpacingExtra="4dp"/>
         </LinearLayout>
-
-        <!-- Create Budget Button -->
-        <Button
-            android:id="@+id/btnCreate"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/create_budget"
-            android:textColor="@color/text_white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textAllCaps="false"
-            android:background="@drawable/rounded_button"
-            android:backgroundTint="@color/purple_primary" />
-
+        <!--  Create Budget Button  -->
+        <Button android:id="@+id/btnCreate" android:layout_width="match_parent" android:layout_height="56dp" android:layout_alignParentBottom="true" android:layout_marginStart="16dp" android:layout_marginEnd="16dp" android:layout_marginTop="8dp" android:layout_marginBottom="16dp" android:text="@string/create_budget" android:textColor="@color/text_white" android:textSize="18sp" android:textStyle="bold" android:textAllCaps="false" android:background="@drawable/rounded_button" android:backgroundTint="@color/purple_primary"/>
     </RelativeLayout>
-
 </RelativeLayout>

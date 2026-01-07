@@ -1,13 +1,13 @@
 package com.example.fintracker;
-
+import android.content.Intent;
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,9 +19,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -30,19 +33,19 @@ import java.util.Map;
  * FEATURES:
  * 1. Amount input with validation
  * 2. Currency selector: USD or KHR ONLY
- * 3. Month selector: This Month or Last Month ONLY (no future)
+ * 3. Month selector: User can pick any month
  * 4. Category selector with "Add New Category" button
  * 5. Edit existing budget
  */
 public class CreateBudgetActivity extends AppCompatActivity {
 
     // Views
-    private EditText etAmount;
-    private Spinner spinnerCurrency, spinnerMonth, spinnerCategory;
+    private EditText etAmount, etMonth;
+    private Spinner spinnerCurrency, spinnerCategory;
     private Button btnSave, btnAddCategory;
     private ImageButton btnBack;
     private TextView tvTitle;
-    private LinearLayout layoutAddCategory;
+    private View layoutAddCategory;  // Changed from LinearLayout to View to support CardView
     private EditText etNewCategoryName;
     private Button btnSaveNewCategory, btnCancelNewCategory;
 
@@ -55,10 +58,7 @@ public class CreateBudgetActivity extends AppCompatActivity {
     private final List<String> categoryIdList = new ArrayList<>();
     private boolean isEditMode = false;
     private String budgetId = null;
-
-    // Month options (This Month and Last Month ONLY)
-    private final long[] monthTimestamps = new long[2];
-    private final String[] monthNames = new String[2];
+    private long selectedMonthTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +77,7 @@ public class CreateBudgetActivity extends AppCompatActivity {
 
         // Setup spinners
         setupCurrencySpinner();
-        setupMonthSpinner();
+        setupMonthPicker();
         loadCategories();
 
         // Setup listeners
@@ -86,8 +86,8 @@ public class CreateBudgetActivity extends AppCompatActivity {
 
     private void initViews() {
         etAmount = findViewById(R.id.etAmount);
+        etMonth = findViewById(R.id.etMonth);
         spinnerCurrency = findViewById(R.id.spinnerCurrency);
-        spinnerMonth = findViewById(R.id.spinnerMonth);
         spinnerCategory = findViewById(R.id.spinnerCategory);
         btnSave = findViewById(R.id.btnSave);
         btnBack = findViewById(R.id.btnBack);
@@ -133,27 +133,61 @@ public class CreateBudgetActivity extends AppCompatActivity {
     }
 
     /**
-     * Setup Month Spinner - This Month and Last Month ONLY
-     * Future months are NOT included
+     * Setup Month Picker - Allow user to select any month
      */
-    private void setupMonthSpinner() {
-        // Get This Month timestamp
-        monthTimestamps[0] = DateUtils.getThisMonthStartTimestamp();
-        monthNames[0] = DateUtils.getMonthName(monthTimestamps[0]);
+    private void setupMonthPicker() {
+        // Set current month as default
+        selectedMonthTimestamp = DateUtils.getThisMonthStartTimestamp();
+        updateMonthDisplay(selectedMonthTimestamp);
 
-        // Get Last Month timestamp
-        monthTimestamps[1] = DateUtils.getLastMonthStartTimestamp();
-        monthNames[1] = DateUtils.getMonthName(monthTimestamps[1]);
-
-        // Create adapter with ONLY 2 options
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                monthNames
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerMonth.setAdapter(adapter);
+        // Make EditText clickable to show date picker
+        etMonth.setFocusable(false);
+        etMonth.setClickable(true);
+        etMonth.setOnClickListener(v -> showMonthPicker());
     }
+
+    /**
+     * Show month picker dialog
+     */
+    private void showMonthPicker() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selectedMonthTimestamp);
+
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, selectedYear, selectedMonth, dayOfMonth) -> {
+                    // Set to first day of selected month
+                    Calendar selected = Calendar.getInstance();
+                    selected.set(Calendar.YEAR, selectedYear);
+                    selected.set(Calendar.MONTH, selectedMonth);
+                    selected.set(Calendar.DAY_OF_MONTH, 1);
+                    selected.set(Calendar.HOUR_OF_DAY, 0);
+                    selected.set(Calendar.MINUTE, 0);
+                    selected.set(Calendar.SECOND, 0);
+                    selected.set(Calendar.MILLISECOND, 0);
+
+                    selectedMonthTimestamp = selected.getTimeInMillis();
+                    updateMonthDisplay(selectedMonthTimestamp);
+                },
+                year,
+                month,
+                1
+        );
+
+        datePickerDialog.show();
+    }
+
+    /**
+     * Update month display text
+     */
+    private void updateMonthDisplay(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+        etMonth.setText(sdf.format(new java.util.Date(timestamp)));
+    }
+
 
     /**
      * Load categories from Firestore (global category list)
@@ -266,8 +300,6 @@ public class CreateBudgetActivity extends AppCompatActivity {
         // Get values
         String amountStr = etAmount.getText().toString().trim();
         String currency = spinnerCurrency.getSelectedItem().toString();
-        int monthIndex = spinnerMonth.getSelectedItemPosition();
-        long selectedMonthTimestamp = monthTimestamps[monthIndex];
         int categoryIndex = spinnerCategory.getSelectedItemPosition();
 
         // Validation
@@ -298,13 +330,6 @@ public class CreateBudgetActivity extends AppCompatActivity {
             return;
         }
 
-        // Month validation (This Month or Last Month only)
-        if (!DateUtils.isValidBudgetMonth(selectedMonthTimestamp)) {
-            Toast.makeText(this, "Invalid month. Only This Month or Last Month allowed.",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         // Category validation
         if (categoryIndex < 0 || categoryIndex >= categoryList.size()) {
             Toast.makeText(this, "Please select a category", Toast.LENGTH_SHORT).show();
@@ -325,31 +350,46 @@ public class CreateBudgetActivity extends AppCompatActivity {
     /**
      * Create new budget
      */
-    private void createBudget(double amount, String currency, long monthTimestamp,
-                              String categoryId, String categoryName) {
+    private void createBudget(double amount, String currency, long monthTimestamp, String categoryId, String categoryName) {
         String userId = mAuth.getCurrentUser().getUid();
 
-        // Check if budget already exists for this category and month
         db.collection("budgets")
                 .whereEqualTo("userId", userId)
                 .whereEqualTo("categoryId", categoryId)
-                .whereEqualTo("monthTimestamp", monthTimestamp)
+                // IMPORTANT: check both fields so duplicates are blocked even if old docs exist
+                .whereEqualTo("startDate", monthTimestamp)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(this, "Budget already exists for this category and month",
-                                Toast.LENGTH_LONG).show();
+                        new androidx.appcompat.app.AlertDialog.Builder(this)
+                                .setTitle("Budget Already Exists")
+                                .setMessage("You already have a budget for " + categoryName + " in this month. Do you want to edit it?")
+                                .setPositiveButton("Edit", (dialog, which) -> {
+                                    String existingBudgetId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                                    Intent intent = new Intent(this, CreateBudgetActivity.class);
+                                    intent.putExtra("budgetId", existingBudgetId);
+                                    finish();
+                                    startActivity(intent);
+                                })
+                                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                                .setCancelable(true)
+                                .show();
                         return;
                     }
 
-                    // Create budget
                     Map<String, Object> budget = new HashMap<>();
                     budget.put("userId", userId);
                     budget.put("categoryId", categoryId);
                     budget.put("categoryName", categoryName);
                     budget.put("amount", amount);
                     budget.put("currency", currency);
-                    budget.put("monthTimestamp", monthTimestamp);
+
+                    // Backward + forward compatibility:
+                    budget.put("monthTimestamp", monthTimestamp); // legacy filter [file:79]
+                    budget.put("startDate", monthTimestamp);      // new canonical field [file:120]
+                    budget.put("period", "MONTH");                // aligns with Budget model [file:120]
+
                     budget.put("spent", 0.0);
                     budget.put("createdAt", System.currentTimeMillis());
                     budget.put("updatedAt", System.currentTimeMillis());
@@ -357,39 +397,48 @@ public class CreateBudgetActivity extends AppCompatActivity {
                     db.collection("budgets")
                             .add(budget)
                             .addOnSuccessListener(documentReference -> {
-                                Toast.makeText(this, "Budget created successfully!",
-                                        Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Budget created successfully!", Toast.LENGTH_SHORT).show();
                                 finish();
                             })
-                            .addOnFailureListener(e -> Toast.makeText(this, "Error creating budget: " + e.getMessage(),
-                                    Toast.LENGTH_SHORT).show());
-                });
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Error creating budget: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error checking budget: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
+
 
     /**
      * Update existing budget
      */
-    private void updateBudget(double amount, String currency, long monthTimestamp,
-                              String categoryId, String categoryName) {
+    private void updateBudget(double amount, String currency, long monthTimestamp, String categoryId, String categoryName) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("categoryId", categoryId);
         updates.put("categoryName", categoryName);
         updates.put("amount", amount);
         updates.put("currency", currency);
+
+        // Backward + forward compatibility:
         updates.put("monthTimestamp", monthTimestamp);
+        updates.put("startDate", monthTimestamp);
+        updates.put("period", "MONTH");
+
         updates.put("updatedAt", System.currentTimeMillis());
 
         db.collection("budgets")
                 .document(budgetId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Budget updated successfully!",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Budget updated successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Error updating budget: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error updating budget: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
+
 
     /**
      * Load budget data for edit mode
@@ -419,11 +468,8 @@ public class CreateBudgetActivity extends AppCompatActivity {
                         // Set month
                         Long monthTimestamp = documentSnapshot.getLong("monthTimestamp");
                         if (monthTimestamp != null) {
-                            if (monthTimestamp == monthTimestamps[0]) {
-                                spinnerMonth.setSelection(0); // This Month
-                            } else if (monthTimestamp == monthTimestamps[1]) {
-                                spinnerMonth.setSelection(1); // Last Month
-                            }
+                            selectedMonthTimestamp = monthTimestamp;
+                            updateMonthDisplay(selectedMonthTimestamp);
                         }
 
                         // Category will be set after categories are loaded

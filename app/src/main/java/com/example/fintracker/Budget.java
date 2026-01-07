@@ -4,7 +4,7 @@ import com.example.fintracker.utils.DateUtils;
 
 /**
  * Budget Model with Period Support
- *
+ * <p>
  * Period Types:
  * - WEEK: 7 days
  * - MONTH: 1 calendar month
@@ -112,8 +112,6 @@ public class Budget {
         switch (Period.valueOf(period)) {
             case WEEK:
                 return "Week";
-            case MONTH:
-                return "Month";
             case YEAR:
                 return "Year";
             default:

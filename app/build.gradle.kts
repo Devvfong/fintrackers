@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation("com.tbuonomo:dotsindicator:5.0")
     // AndroidX
     implementation(libs.appcompat)
     implementation(libs.material)

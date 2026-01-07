@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_white">
@@ -11,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="20dp"
+        android:paddingTop="36dp"
         android:gravity="center_vertical"
         android:layout_alignParentTop="true">
 
@@ -57,6 +58,7 @@
         android:layout_below="@id/layoutHeader"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:paddingTop="20dp"
         android:paddingBottom="80dp"
         android:clipToPadding="false" />
 
@@ -65,11 +67,12 @@
         android:id="@+id/fabAddTransaction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="24dp"
         android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/purple_primary"
         app:tint="@android:color/white"
-        app:backgroundTint="@color/purple_primary" />
+        tools:ignore="SpeakableTextPresentCheck" />
 
 </RelativeLayout>

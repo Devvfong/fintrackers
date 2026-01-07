@@ -36,13 +36,16 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -58,7 +61,6 @@ public class AddTransactionActivity extends AppCompatActivity {
     private AutoCompleteTextView actvCategory, actvWallet;
     private TextInputEditText etDescription, etDate;
     private MaterialButton btnContinue;
-    private SwitchMaterial switchRepeat;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -77,7 +79,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private ActivityResultLauncher<PickVisualMediaRequest> photoPickerLauncher;
     private ActivityResultLauncher<Intent> legacyGalleryLauncher;
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "MissingInflatedId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,7 +119,6 @@ public class AddTransactionActivity extends AppCompatActivity {
             Toast.makeText(this, "Attachment removed", Toast.LENGTH_SHORT).show();
         });
 
-        switchRepeat = findViewById(R.id.switchRepeat);
         Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra("editMode", false)) {
             isEditMode = true;
@@ -195,58 +196,152 @@ public class AddTransactionActivity extends AppCompatActivity {
         ArrayAdapter<String> walletAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, wallets);
         actvWallet.setAdapter(walletAdapter);
-        android.util.Log.d("AddTransaction", "setupDropdowns called");
-        actvCategory.setOnClickListener(v -> {
-            android.util.Log.d("AddTransaction", "Category clicked, adapter=" + actvCategory.getAdapter());
-            actvCategory.showDropDown();
-        });
-
     }
 
     /**
-     * Load categories from Firestore
-     * Categories created in Budget will automatically appear here!
+     * Load categories from Firestore (synced with Budget)
+     * INCLUDES "+ Create New Category" option
      */
     private void loadCategoriesFromFirestore() {
-        // Static fallback (also used if Firestore is empty/fails)
-        java.util.LinkedHashSet<String> merged = new java.util.LinkedHashSet<>();
-        java.util.Collections.addAll(merged,
-                "Shopping", "Food", "Transport", "Subscription", "Bills",
-                "Entertainment", "Healthcare", "Salary", "Other"
-        );
-
         db.collection("categories")
                 .orderBy("name")
                 .get()
-                .addOnSuccessListener(snaps -> {
-                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : snaps) {
-                        String name = doc.getString("name"); // this matches CreateBudgetActivity [file:227]
-                        if (name != null && !name.trim().isEmpty()) merged.add(name.trim());
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<String> categories = new ArrayList<>();
+
+                    // Add categories from Firestore
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String categoryName = doc.getString("name");
+                        if (categoryName != null && !categoryName.trim().isEmpty()) {
+                            categories.add(categoryName.trim());
+                        }
                     }
 
+                    // If no categories in Firestore, add defaults
+                    if (categories.isEmpty()) {
+                        categories.add("Shopping");
+                        categories.add("Food");
+                        categories.add("Transport");
+                        categories.add("Subscription");
+                        categories.add("Bills");
+                        categories.add("Entertainment");
+                        categories.add("Healthcare");
+                        categories.add("Salary");
+                        categories.add("Other");
+                    }
+
+                    // Add "+ Create New Category" option at the end
+                    categories.add("+ Create New Category");
+
+                    // Setup adapter
+                    String[] categoryArray = categories.toArray(new String[0]);
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(
                             this,
                             android.R.layout.simple_dropdown_item_1line,
-                            new java.util.ArrayList<>(merged)
+                            categoryArray
                     );
                     actvCategory.setAdapter(adapter);
+
+                    // Handle category selection
+                    actvCategory.setOnItemClickListener((parent, view, position, id) -> {
+                        String selected = (String) parent.getItemAtPosition(position);
+
+                        if (selected.equals("+ Create New Category")) {
+                            // Clear the selection
+                            actvCategory.setText("", false);
+                            // Show dialog to create new category
+                            showCreateCategoryDialog();
+                        }
+                    });
                 })
                 .addOnFailureListener(e -> {
-                    // Still show static list if Firestore fails
+                    // Fallback to default categories if Firestore fails
+                    List<String> categories = new ArrayList<>();
+                    categories.add("Shopping");
+                    categories.add("Food");
+                    categories.add("Transport");
+                    categories.add("Subscription");
+                    categories.add("Bills");
+                    categories.add("Entertainment");
+                    categories.add("Healthcare");
+                    categories.add("Salary");
+                    categories.add("Other");
+                    categories.add("+ Create New Category");
+
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(
                             this,
                             android.R.layout.simple_dropdown_item_1line,
-                            new java.util.ArrayList<>(merged)
+                            categories.toArray(new String[0])
                     );
                     actvCategory.setAdapter(adapter);
+
                     Toast.makeText(this, "Using default categories", Toast.LENGTH_SHORT).show();
                 });
-        android.util.Log.d("AddTransaction", "setupDropdowns called");
-        actvCategory.setOnClickListener(v -> {
-            android.util.Log.d("AddTransaction", "Category clicked, adapter=" + actvCategory.getAdapter());
-            actvCategory.showDropDown();
+    }
+
+    /**
+     * Show dialog to create new category
+     * NEW category is automatically synced to Budget!
+     */
+    private void showCreateCategoryDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Create New Category");
+
+        // Create EditText for category name
+        final EditText input = new EditText(this);
+        input.setHint("Category name");
+        input.setPadding(50, 40, 50, 40);
+        builder.setView(input);
+
+        builder.setPositiveButton("Create", (dialog, which) -> {
+            String categoryName = input.getText().toString().trim();
+
+            if (categoryName.isEmpty()) {
+                Toast.makeText(this, "Category name cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Check if category already exists
+            db.collection("categories")
+                    .whereEqualTo("name", categoryName)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty()) {
+                            Toast.makeText(this, "Category already exists", Toast.LENGTH_SHORT).show();
+                            // Set the existing category
+                            actvCategory.setText(categoryName, false);
+                        } else {
+                            // Create new category in Firestore
+                            Map<String, Object> category = new HashMap<>();
+                            category.put("name", categoryName);
+                            category.put("createdAt", System.currentTimeMillis());
+
+                            db.collection("categories")
+                                    .add(category)
+                                    .addOnSuccessListener(documentReference -> {
+                                        Toast.makeText(this, "✅ Category created: " + categoryName,
+                                                Toast.LENGTH_SHORT).show();
+
+                                        // Reload categories to show new one
+                                        loadCategoriesFromFirestore();
+
+                                        // Select the new category
+                                        actvCategory.setText(categoryName, false);
+                                    })
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(this, "Error creating category: " + e.getMessage(),
+                                                    Toast.LENGTH_SHORT).show()
+                                    );
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Error checking category: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show()
+                    );
         });
 
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
     }
 
 
@@ -554,7 +649,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         transaction.put("description", description);
         transaction.put("type", type);
         transaction.put("timestamp", selectedTimestamp);
-        transaction.put("isRepeated", switchRepeat.isChecked());
+        transaction.put("isRepeated", false);
         if (attachmentUrl != null && !attachmentUrl.trim().isEmpty()) {
             transaction.put("attachmentUrl", attachmentUrl);
         }
