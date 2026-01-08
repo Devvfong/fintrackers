@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+
     implementation("com.tbuonomo:dotsindicator:5.0")
     implementation("com.github.yalantis:ucrop:2.2.11")
 // OR for better quality (uses native code, slightly larger APK)

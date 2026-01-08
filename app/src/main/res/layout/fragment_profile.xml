@@ -104,6 +104,30 @@
                     android:layout_height="1dp"
                     android:background="@color/divider"/>
 
+                <!-- Export Transactions -->
+                <LinearLayout
+                    android:id="@+id/menuExport"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Export Transactions"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_save"
+                        app:tint="@color/text_secondary"/>
+                </LinearLayout>
                 <!-- Logout -->
                 <LinearLayout
                     android:id="@+id/menuLogout"
@@ -128,6 +152,7 @@
                         android:src="@android:drawable/ic_menu_more"
                         app:tint="@color/text_secondary"/>
                 </LinearLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
