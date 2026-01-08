@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Material Design default colors (add these) -->
+    <color name="purple_500">#7F3DFF</color>  <!-- Matches your purple_primary -->
+    <color name="purple_700">#512DA8</color>
+    <color name="teal_200">#03DAC6</color>
+    <!-- Add these colors if they don't exist -->
+<!--    <color name="light_purple">#F3E5F5</color>-->
+    <color name="purple_dark">#512DA8</color>
+    <color name="light_gray">#EEEEEE</color>
+    <color name="green_light">#E6F4EA</color>
+<!--    <color name="green">#1E8E3E</color>-->
+    <color name="purple">#7F3DFF</color>
+
     <color name="bg_screen">#F5F5F5</color>
     <color name="bg_card">#E0E0E0</color>
     <color name="text_primary">#212121</color>

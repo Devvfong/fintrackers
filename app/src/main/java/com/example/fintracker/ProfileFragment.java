@@ -1,19 +1,23 @@
 package com.example.fintracker;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,61 +25,91 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class ProfileFragment extends Fragment {
 
     private TextView tvUsername, tvInitials;
+    private ImageView ivProfilePicture;
+    private LinearLayout menuAccount, menuLogout;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    // ✅ Modern launcher - No deprecated startActivityForResult
+    private final ActivityResultLauncher<Intent> accountLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            loadUserData();  // Refresh profile photo immediately ✅
+                        }
+                    });
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Initialize views
+        // Find all views
         tvUsername = view.findViewById(R.id.tvUsername);
         tvInitials = view.findViewById(R.id.tvInitials);
-        LinearLayout menuAccount = view.findViewById(R.id.menuAccount);
-        LinearLayout menuSettings = view.findViewById(R.id.menuSettings);
-        LinearLayout menuExportData = view.findViewById(R.id.menuExportData);
-        LinearLayout menuLogout = view.findViewById(R.id.menuLogout);
+        ivProfilePicture = view.findViewById(R.id.ivProfilePicture);
+        menuAccount = view.findViewById(R.id.menuAccount);
+        menuLogout = view.findViewById(R.id.menuLogout);
 
-        // Load user data
-        loadUserData();
-
-        // Menu clicks
-        menuAccount.setOnClickListener(v -> Toast.makeText(getContext(), "Account settings coming soon", Toast.LENGTH_SHORT).show());
-
-        menuSettings.setOnClickListener(v -> Toast.makeText(getContext(), "Settings coming soon", Toast.LENGTH_SHORT).show());
-
-        menuExportData.setOnClickListener(v -> Toast.makeText(getContext(), "Export data coming soon", Toast.LENGTH_SHORT).show());
+        // ✅ Modern launcher - Clean & simple
+        menuAccount.setOnClickListener(v ->
+                accountLauncher.launch(new Intent(requireContext(), AccountActivity.class)));
 
         menuLogout.setOnClickListener(v -> showLogoutDialog());
 
+        loadUserData();
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadUserData();  // Refresh when returning from AccountActivity ✅
+    }
+
     private void loadUserData() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
 
-            db.collection("users").document(userId)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String name = documentSnapshot.getString("name");
-                            tvUsername.setText(name != null ? name : "User");
+        db.collection("users").document(user.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String name = documentSnapshot.getString("name");
+                        String photoUrl = documentSnapshot.getString("profilePhotoUrl");
 
-                            // Set initials
+                        // Update name
+                        tvUsername.setText(name != null && !name.isEmpty() ? name : "User");
+
+                        // Load photo or show initials
+                        if (photoUrl != null && !photoUrl.isEmpty()) {
+                            Glide.with(this)
+                                    .load(photoUrl)
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_person)  // Add this drawable if missing
+                                    .error(R.drawable.ic_person)
+                                    .into(ivProfilePicture);
+                            ivProfilePicture.setVisibility(View.VISIBLE);
+                            tvInitials.setVisibility(View.GONE);
+                        } else {
+                            // Show initials
+                            String initials = "U";
                             if (name != null && !name.isEmpty()) {
-                                String initials = name.substring(0, Math.min(2, name.length())).toUpperCase();
-                                tvInitials.setText(initials);
+                                initials = name.substring(0, Math.min(2, name.length())).toUpperCase();
                             }
+                            tvInitials.setText(initials);
+                            ivProfilePicture.setVisibility(View.GONE);
+                            tvInitials.setVisibility(View.VISIBLE);
                         }
-                    });
-        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Silent fail - show defaults
+                });
     }
 
     private void showLogoutDialog() {
@@ -87,7 +121,9 @@ public class ProfileFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
-                    requireActivity().finish();
+                    if (getActivity() != null) {
+                        getActivity().finish();
+                    }
                 })
                 .setNegativeButton("No", null)
                 .show();

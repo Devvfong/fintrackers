@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -23,6 +25,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -50,6 +53,10 @@ public class HomeFragment extends Fragment {
     private double totalIncome = 0;
     private double totalExpense = 0;
 
+    // Profile photo views
+    private ImageView ivUserProfile;  // Real photo
+    private ImageView ivDefaultProfile;  // Fallback default icon (your ic_profile)
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
@@ -68,10 +75,13 @@ public class HomeFragment extends Fragment {
         spendFrequencyChart = view.findViewById(R.id.spendFrequencyChart);
         RecyclerView rvRecentTransactions = view.findViewById(R.id.rvRecentTransactions);
 
+        // Profile photo views
+        ivUserProfile = view.findViewById(R.id.ivUserProfile);
+        ivDefaultProfile = view.findViewById(R.id.ivProfile);  // Your default icon
+
         rvRecentTransactions.setLayoutManager(new LinearLayoutManager(getContext()));
         rvRecentTransactions.setNestedScrollingEnabled(false);
 
-        // Pass false to hide edit button
         adapter = new TransactionAdapter(
                 requireContext(),
                 recentTransactions,
@@ -85,15 +95,50 @@ public class HomeFragment extends Fragment {
                         // TODO: Open detail
                     }
                 },
-                false  // Hide edit button
+                false
         );
         rvRecentTransactions.setAdapter(adapter);
 
         setupChart();
+
         if (mAuth.getCurrentUser() != null) {
             loadTransactions();
+            loadUserProfilePhoto();  // Load profile photo
         }
     }
+
+    private void loadUserProfilePhoto() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        db.collection("users").document(user.getUid())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String photoUrl = documentSnapshot.getString("profilePhotoUrl");
+
+                        if (photoUrl != null && !photoUrl.isEmpty()) {
+                            Glide.with(HomeFragment.this)
+                                    .load(photoUrl)
+                                    .circleCrop()
+                                    .into(ivUserProfile);
+
+                            ivUserProfile.setVisibility(View.VISIBLE);
+                            ivDefaultProfile.setVisibility(View.GONE);
+                        } else {
+                            // No photo → show default icon
+                            ivUserProfile.setVisibility(View.GONE);
+                            ivDefaultProfile.setVisibility(View.VISIBLE);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // On error, show default
+                    ivUserProfile.setVisibility(View.GONE);
+                    ivDefaultProfile.setVisibility(View.VISIBLE);
+                });
+    }
+
     private void updateBudgetSpending(String category, double amount) {
         assert mAuth.getCurrentUser() != null;
         String userId = mAuth.getCurrentUser().getUid();
@@ -121,7 +166,6 @@ public class HomeFragment extends Fragment {
         String userId = mAuth.getCurrentUser().getUid();
         Log.d("HomeFragment", "Loading transactions for user: " + userId);
 
-        // Load ALL transactions
         db.collection("transactions")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener((value, error) -> {
@@ -140,7 +184,6 @@ public class HomeFragment extends Fragment {
                             t.setId(document.getId());
                             allTrans.add(t);
 
-                            // Calculate totals
                             if ("Income".equals(t.getType())) {
                                 totalIncome += t.getAmount();
                             } else {
@@ -149,35 +192,30 @@ public class HomeFragment extends Fragment {
                         }
                     }
 
-                    // Sort by newest first
                     allTrans.sort((t1, t2) -> Long.compare(t2.getTimestamp(), t1.getTimestamp()));
 
-                    // Get top 5 for recent transactions list
                     recentTransactions.clear();
                     int limit = Math.min(5, allTrans.size());
                     for (int i = 0; i < limit; i++) {
                         recentTransactions.add(allTrans.get(i));
                     }
 
-                    // Get last 30 days for chart
-                    allTransactions.clear();
                     Calendar calendar = Calendar.getInstance();
                     calendar.add(Calendar.DAY_OF_MONTH, -30);
                     long thirtyDaysAgo = calendar.getTimeInMillis();
 
+                    allTransactions.clear();
                     for (Transaction t : allTrans) {
                         if (t.getTimestamp() > thirtyDaysAgo) {
                             allTransactions.add(t);
                         }
                     }
 
-                    // Update UI
                     adapter.updateTransactions(recentTransactions);
                     updateBalanceUI();
                     updateChart();
 
                     Log.d("HomeFragment", "Loaded " + recentTransactions.size() + " recent transactions");
-                    Log.d("HomeFragment", "Adapter count: " + adapter.getItemCount());
                 });
     }
 
@@ -213,7 +251,6 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // Only expense transactions
         List<Transaction> expenseTransactions = new ArrayList<>();
         for (Transaction t : allTransactions) {
             if ("Expense".equals(t.getType())) {
@@ -277,6 +314,7 @@ public class HomeFragment extends Fragment {
         super.onResume();
         if (mAuth.getCurrentUser() != null) {
             loadTransactions();
+            loadUserProfilePhoto();  // Refresh photo on resume
         }
     }
 }

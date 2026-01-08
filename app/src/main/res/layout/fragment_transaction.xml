@@ -16,6 +16,7 @@
         android:gravity="center_vertical"
         android:layout_alignParentTop="true">
 
+
         <!-- Back button -->
         <ImageButton
             android:id="@+id/btnBack"

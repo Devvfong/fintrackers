@@ -1,5 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Add these to your existing strings.xml file -->
+
+    <!-- Camera/Photo strings (ADD THESE) -->
+    <string name="camera_access_denied">Camera permission denied</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="choose_from_gallery">Choose from Gallery</string>
+
+
+    <!-- Account Screen Strings (ADD THESE) -->
+    <string name="account">Account</string>
+    <string name="account_information">Account Information</string>
+    <string name="user_id">User ID</string>
+    <string name="verified">Verified</string>
+    <string name="security">Security</string>
+    <string name="change_password">Change Password</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="edit_name">Edit Name</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="change_photo">Change Photo</string>
+    <string name="no_email">No email</string>
+
+    <!-- Photo Options Dialog -->
+    <string name="profile_photo">Profile Photo</string>
+    <string name="remove_photo">Remove Photo</string>
+
+    <!-- Dialogs -->
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_deletion">Confirm Deletion</string>
+    <string name="enter_password_to_confirm">Please enter your password to confirm account deletion:</string>
+    <string name="password_required">Password required</string>
+
+    <!-- Success/Error Messages -->
+    <string name="name_updated_successfully">Name updated successfully</string>
+    <string name="failed_to_update_name">Failed to update name</string>
+    <string name="password_changed_successfully">Password changed successfully</string>
+    <string name="failed_to_change_password">Failed to change password: %s</string>
+    <string name="current_password_incorrect">Current password is incorrect</string>
+    <string name="password_incorrect">Password is incorrect</string>
+    <string name="account_deleted_successfully">Account deleted successfully</string>
+    <string name="failed_to_delete_account">Failed to delete account: %s</string>
+    <string name="failed_to_load_user_data">Failed to load user data</string>
+    <string name="uploading_photo">Uploading photo…</string>
+    <string name="profile_photo_updated">Profile photo updated</string>
+    <string name="failed_to_save_photo_url">Failed to save photo URL</string>
+    <string name="failed_to_upload_photo">Failed to upload photo</string>
+    <string name="failed_to_remove_photo">Failed to remove photo</string>
+    <string name="profile_photo_removed">Profile photo removed</string>
+    <string name="crop_error">Crop error: %s</string>
+
+    <!-- Validation Messages -->
+    <string name="name_cannot_be_empty">Name cannot be empty</string>
+    <string name="please_fill_all_fields">Please fill all fields</string>
+    <string name="new_passwords_dont_match">New passwords don\'t match</string>
+    <string name="password_must_be_6_chars">Password must be at least 6 characters</string>
+
+    <!-- Confirmation Messages -->
+    <string name="delete_account_warning">This action cannot be undone. All your data will be permanently deleted.</string>
+    <string name="remove_photo_confirmation">Are you sure you want to remove your profile photo?</string>
+
+    <!-- Default Values -->
+    <string name="default_user_name">User</string>
+    <string name="default_user_initials">US</string>
 
     <!-- Budget Strings -->
     <string name="save_budget">Save Budget</string>

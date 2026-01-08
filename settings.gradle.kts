@@ -1,3 +1,22 @@
+//pluginManagement {
+//    repositories {
+//        google()
+//        mavenCentral()
+//        gradlePluginPortal()
+//    }
+//}
+//
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//        maven { url = uri("https://jitpack.io") }
+//    }
+//}
+//
+//rootProject.name = "fintracker"
+//include(":app")
 pluginManagement {
     repositories {
         google()
@@ -15,5 +34,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "fintracker"
+rootProject.name = "Fintrackers"
 include(":app")

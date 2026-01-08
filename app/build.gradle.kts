@@ -34,6 +34,9 @@ android {
 
 dependencies {
     implementation("com.tbuonomo:dotsindicator:5.0")
+    implementation("com.github.yalantis:ucrop:2.2.11")
+// OR for better quality (uses native code, slightly larger APK)
+    implementation("com.github.yalantis:ucrop:2.2.11-native")
     // AndroidX
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -60,12 +63,11 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
+    // UCrop for image cropping
+    implementation("com.github.yalantis:ucrop:2.2.8")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
-    // ADD to build.gradle.kts
-    implementation("androidx.compose.material:material-icons-extended:1.6.8")
-
 }

@@ -47,17 +47,8 @@ public class SplashActivity extends AppCompatActivity {
                 // User is logged in, go to MainActivity
                 intent = new Intent(SplashActivity.this, MainActivity.class);
             } else {
-                // Check if user has seen onboarding
-                boolean hasSeenOnboarding = getSharedPreferences("AppPrefs", MODE_PRIVATE)
-                        .getBoolean("hasSeenOnboarding", false);
-
-                if (hasSeenOnboarding) {
-                    // Go directly to login
-                    intent = new Intent(SplashActivity.this, LoginActivity.class);
-                } else {
-                    // Show onboarding first
-                    intent = new Intent(SplashActivity.this, OnboardingActivity.class);
-                }
+                // User not logged in, go to LoginActivity
+                intent = new Intent(SplashActivity.this, LoginActivity.class);
             }
 
             startActivity(intent);

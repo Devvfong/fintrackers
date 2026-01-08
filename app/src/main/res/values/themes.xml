@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <style name="UCropCompactTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/purple</item>
+        <item name="colorPrimaryDark">@color/purple_dark</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="actionBarSize">56dp</item>  <!-- Makes toolbar shorter and buttons reachable -->
+    </style>
     <!-- Base application theme -->
     <style name="Base.Theme.Fintrack" parent="Theme.Material3.Light.NoActionBar">
+
         <!-- Primary brand color -->
         <item name="colorPrimary">@color/purple_primary</item>
         <item name="colorPrimaryVariant">@color/purple_primary</item>
