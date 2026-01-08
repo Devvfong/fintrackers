@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Add these to your existing strings.xml file -->
-
+<!--    <string name="forgot_password">Forgot Password?</string>-->
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="reset_instructions">Enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="reset_link_sent">Password reset link sent! Check your email.</string>
+    <string name="reset_link_failed">Failed to send reset link. Please try again.</string>
+    <string name="back_to_login">Back to Login</string>
     <!-- Camera/Photo strings (ADD THESE) -->
     <string name="camera_access_denied">Camera permission denied</string>
     <string name="take_photo">Take Photo</string>

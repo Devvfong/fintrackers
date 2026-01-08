@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword;
     private MaterialButton btnLogin;
+    private TextView tvForgotPassword;  // For "Forgot Password?" link
     private FirebaseAuth mAuth;
 
     @Override
@@ -33,15 +35,19 @@ public class LoginActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
+
+        // Forgot Password click → open new activity
+        tvForgotPassword.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
+        });
 
         // Login button click
         btnLogin.setOnClickListener(v -> loginUser());
 
         // Sign up link click
-        findViewById(R.id.tvSignUpLink).setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, SignUpActivity.class)));
-
-        // Forgot password click
-        findViewById(R.id.tvForgotPassword).setOnClickListener(v -> Toast.makeText(this, "Forgot password feature coming soon", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.tvSignUpLink).setOnClickListener(v ->
+                startActivity(new Intent(LoginActivity.this, SignUpActivity.class)));
     }
 
     @Override
@@ -86,7 +92,9 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                         navigateToMain();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Login failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this,
+                                "Login failed: " + Objects.requireNonNull(task.getException()).getMessage(),
+                                Toast.LENGTH_LONG).show();
                         btnLogin.setEnabled(true);
                         btnLogin.setText("Login");
                     }

@@ -63,7 +63,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:parentActivityName=".LoginActivity"
+            android:theme="@style/Theme.Fintrack" />
         <!-- Login Activity -->
         <activity
             android:name=".LoginActivity"
